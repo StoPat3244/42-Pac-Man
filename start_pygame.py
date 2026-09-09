@@ -147,54 +147,66 @@ def run_pygame(maze, pacgums: int) -> None:
 
     # Initialize Pacman
     pacman_position = (1, 1)
+    pacman_direction = "right"
+    requested_direction = None
+
+    movement_timer = 0
+    movement_delay = 150  # milliseconds between movements
 
     pacman_image = pygame.image.load("pacman.png").convert_alpha()
 
     pacman_image = pygame.transform.scale(pacman_image, (CELL_SIZE, CELL_SIZE))
 
     while running:
-        for event in pygame.event.get():      # check the event
-            if event.type == pygame.QUIT:     # check closing window
+
+        dt = clock_frames.tick(60)  # 60 frames x second (how many times this loop run per second)
+
+        for event in pygame.event.get():
+
+            if event.type == pygame.QUIT:
                 running = False
 
             if event.type == pygame.KEYDOWN:
 
                 if event.key == pygame.K_UP:
-                    pacman_position = move_pacman(
-                        maze,
-                        pacman_position,
-                        "up"
-                    )
+                    requested_direction = "up"
 
                 elif event.key == pygame.K_DOWN:
-                    pacman_position = move_pacman(
-                        maze,
-                        pacman_position,
-                        "down"
-                    )
+                    requested_direction = "down"
 
                 elif event.key == pygame.K_LEFT:
-                    pacman_position = move_pacman(
-                        maze,
-                        pacman_position,
-                        "left"
-                    )
+                    requested_direction = "left"
 
                 elif event.key == pygame.K_RIGHT:
-                    pacman_position = move_pacman(
-                        maze,
-                        pacman_position,
-                        "right"
-                    )
+                    requested_direction = "right"
+
+        # Automatic Pac-Man movement
+        movement_timer += dt
+
+        if movement_timer >= movement_delay:
+            movement_timer -= movement_delay
+
+            # Try to change to the requested direction
+            if requested_direction is not None:
+                if can_move(maze, pacman_position, requested_direction):
+                    pacman_direction = requested_direction
+                    requested_direction = None
+
+            # Continue moving in the current direction
+            if can_move(maze, pacman_position, pacman_direction):
+                pacman_position = move_pacman(
+                    maze,
+                    pacman_position,
+                    pacman_direction
+                )
 
         screen.fill((0, 0, 0))                   # background (RGB) color BLACK
         draw_maze(screen, maze, CELL_SIZE)    # prepare the frame
         draw_pac_gums(screen, pac_gums, CELL_SIZE) # Draws pac_gums in maze
         draw_super_pac_gums(screen, super_pac_gums, CELL_SIZE)
 
-        draw_pacman(screen, pacman_position, pacman_image, CELL_SIZE)
+        draw_pacman(screen, pacman_position, pacman_image, CELL_SIZE, pacman_direction)
 
         pygame.display.flip()                    # print the frame to the screen
-        clock_frames.tick(60)            # 60 frames x second (how many times this loop run per second)
 
     pygame.quit()
