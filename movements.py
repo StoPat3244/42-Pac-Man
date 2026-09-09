@@ -29,17 +29,49 @@ def move_pacman(
     return row, column
 
 
+# def draw_pacman(
+#     screen: pygame.Surface,
+#     pacman_position: tuple[int, int],
+#     pacman_image: pygame.Surface,
+#     cell_size: int,
+# ) -> None:
+
+#     row, column = pacman_position
+
+#     x = column * cell_size
+#     y = row * cell_size
+
+#     screen.blit(pacman_image, (x, y))
+
 def draw_pacman(
     screen: pygame.Surface,
     pacman_position: tuple[int, int],
     pacman_image: pygame.Surface,
     cell_size: int,
+    direction: str,
 ) -> None:
-
     row, column = pacman_position
-
     x = column * cell_size
     y = row * cell_size
+
+    if direction == "left":  # Image is not rotated but instead mirrored since if it is rotated, it will be upside down
+        pacman_image = pygame.transform.flip(
+            pacman_image,
+            True,   # flip horizontally
+            False   # don't flip vertically
+        )
+
+    elif direction == "up":
+        pacman_image = pygame.transform.rotate(
+            pacman_image,
+            90
+        )
+
+    elif direction == "down":
+        pacman_image = pygame.transform.rotate(
+            pacman_image,
+            -90
+        )
 
     screen.blit(pacman_image, (x, y))
 
