@@ -1,6 +1,5 @@
 import sys
 import json
-import pygame
 
 from mazegenerator import MazeGenerator
 from start_pygame import run_pygame
@@ -59,14 +58,14 @@ def main() -> None:
         maze_gen = MazeGenerator(size)
         maze = maze_gen.maze
 
-        with open("maze.txt", "w") as e:
-            for row in maze:
-                e.write("".join(f"{cell:X}" for cell in row) + "\n")
+        # with open("maze.txt", "w") as e:
+        #     for row in maze:
+        #         e.write("".join(f"{cell:X}" for cell in row) + "\n")
 
         with open(data["h_score"], "w") as s:
             json.dump(score, s, indent=4)
 
-        run_pygame()
+        run_pygame(maze, data["pacgum"])
     except FileNotFoundError:
         print("Unable to locate config.json")
     except Exception as e:
