@@ -1,5 +1,7 @@
 import pygame
 
+from pacgums import draw_pac_gums, draw_super_pac_gums, generate_pac_gums
+
 # walls
 NORTH = 1   # bit 0
 EAST = 2    # bit 1
@@ -69,6 +71,7 @@ def draw_maze(
                     wall_thickness
                 )
 
+
 def start_screen(screen, width, height):
     # load the image and resize it
     pacman_image = pygame.image.load("pacman.png").convert_alpha()
@@ -114,12 +117,12 @@ def start_screen(screen, width, height):
     return True
 
 
-def run_pygame() -> None:
+def run_pygame(maze, pacgums: int) -> None:
     pygame.init()
 
-    CELL_SIZE = 60       # pixel x cell, we can modify it
+    CELL_SIZE = 80       # pixel x cell, we can modify it
 
-    maze = maze_from_txt_to_array("maze.txt")
+    # maze = maze_from_txt_to_array("maze.txt")
     rows = len(maze)
     columns = len(maze[0])
 
@@ -137,6 +140,10 @@ def run_pygame() -> None:
     clock_frames = pygame.time.Clock()        # create clock to control frames x second
     running = True
 
+    pac_gums = generate_pac_gums(maze, pacgums)
+    nmb_superpacgums = len(pac_gums) // 10 # for every 10 pacgums there is one superpacgum
+    super_pac_gums = generate_pac_gums(maze, nmb_superpacgums, excluded_positions=pac_gums,) # generate super pacgum location and avoiding pacgum location already generated
+
     while running:
         for event in pygame.event.get():      # check the event
             if event.type == pygame.QUIT:     # check closing window
@@ -144,8 +151,9 @@ def run_pygame() -> None:
 
         screen.fill((0, 0, 0))                   # background (RGB) color BLACK
         draw_maze(screen, maze, CELL_SIZE)    # prepare the frame
+        draw_pac_gums(screen, pac_gums, CELL_SIZE) # Draws pac_gums in maze
+        draw_super_pac_gums(screen, super_pac_gums, CELL_SIZE)
         pygame.display.flip()                    # print the frame to the screen
-
 
         clock_frames.tick(60)            # 60 frames x second (how many times this loop run per second)
 
