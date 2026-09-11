@@ -29,20 +29,6 @@ def move_pacman(
     return row, column
 
 
-# def draw_pacman(
-#     screen: pygame.Surface,
-#     pacman_position: tuple[int, int],
-#     pacman_image: pygame.Surface,
-#     cell_size: int,
-# ) -> None:
-
-#     row, column = pacman_position
-
-#     x = column * cell_size
-#     y = row * cell_size
-
-#     screen.blit(pacman_image, (x, y))
-
 def draw_pacman(
     screen: pygame.Surface,
     pacman_position: tuple[int, int],
