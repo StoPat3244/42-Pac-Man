@@ -46,10 +46,32 @@ def draw_pac_gums(
 
         pygame.draw.circle(
             screen,
-            (255, 255, 255),
+            (0, 255, 0),
             (center_x, center_y),
             5
         )
+
+
+def generate_super_pac_gums(
+    maze: list[list[int]],
+) -> list[tuple[int, int]]:
+    rows = len(maze)
+    columns = len(maze[0])
+
+    corners = [
+        (0, 0),                  # top-left
+        (0, columns - 1),        # top-right
+        (rows - 1, 0),           # bottom-left
+        (rows - 1, columns - 1), # bottom-right
+    ]
+
+    super_pac_gums = []
+
+    for row, column in corners:
+        if maze[row][column] != 15:
+            super_pac_gums.append((row, column))
+
+    return super_pac_gums
 
 
 def draw_super_pac_gums(
@@ -69,8 +91,7 @@ def draw_super_pac_gums(
 
         pygame.draw.circle(
             screen,
-            (255, 255, 255),
+            (255, 0, 0),
             (center_x, center_y),
             12
         )
-        
