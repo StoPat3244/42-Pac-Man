@@ -41,14 +41,6 @@ def main() -> None:
         print("Please run game as 'python3 pac-man.py config.json'")
         sys.exit(1)
 
-    name = "Player1"
-    score = 2000
-
-    score = {
-        "Name": name,
-        "Score": score
-    }
-
     try:
         with open("config.json") as f:
             text = f.read()
@@ -57,14 +49,6 @@ def main() -> None:
         size = (data["width"], data["height"])
         maze_gen = MazeGenerator(size)
         maze = maze_gen.maze
-
-        # with open("maze.txt", "w") as e:
-        #     for row in maze:
-        #         e.write("".join(f"{cell:X}" for cell in row) + "\n")
-
-        with open(data["h_score"], "w") as s:
-            json.dump(score, s, indent=4)
-
         run_pygame(maze, data["pacgum"])
     except FileNotFoundError:
         print("Unable to locate config.json")
