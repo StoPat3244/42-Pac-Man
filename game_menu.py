@@ -2,7 +2,11 @@ import pygame
 import json
 import os
 from pathlib import Path
+
+
 MAX_NAME_LENGTH = 20
+
+
 def load_highscores(filename: str = "data/score.json") -> list[dict]:
     # Define the maximum number of highscores to display.
     MAX_HIGHSCORES_DISPLAYED = 10
