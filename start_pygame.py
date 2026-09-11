@@ -1,27 +1,16 @@
 import pygame
 
-from pacgums import draw_pac_gums, draw_super_pac_gums, generate_pac_gums
+from pacgums import draw_pac_gums, draw_super_pac_gums
+from pacgums import generate_pac_gums, generate_super_pac_gums
 from movements import can_move, move_pacman, draw_pacman
+from eating import eat_pac_gum
+from game_menu import main_menu
 
 # walls
 NORTH = 1   # bit 0
 EAST = 2    # bit 1
 SOUTH = 4    # bit 2
 WEST = 8  # bit 3
-
-
-def maze_from_txt_to_array(path: str) -> list[list[int]]:
-    # Reads maze.txt and returns an array of arrays of integers ranging from 0 to 15 in hexadecimal
-    grid = []
-    with open(path) as f:
-        for row in f:
-            row = row.strip()
-            if not row:
-                continue
-            # int(digit, 16) convert a .txt hexadecimal digit in int
-            grid.append([int(digit, 16) for digit in row])
-    return grid
-
 
 def draw_maze(
     screen: pygame.Surface,
@@ -31,7 +20,17 @@ def draw_maze(
     wall_color: tuple[int, int, int] = (33, 79, 222),   # blue Pac-Man
     wall_thickness: int = 6,                            # thickness in pixel
 ) -> None:
-    offset_x, offset_y = offset
+    rows = len(maze)
+    columns = len(maze[0]) if rows else 0
+
+    if offset is None:
+        # No offset given: center the maze inside the current screen.
+        maze_pixel_width = columns * cell_size
+        maze_pixel_height = rows * cell_size
+        offset_x = (screen.get_width() - maze_pixel_width) // 2
+        offset_y = (screen.get_height() - maze_pixel_height) // 2
+    else:
+        offset_x, offset_y = offset
 
     for row_idx, row in enumerate(maze):
         for col_idx, cell_value in enumerate(row):
@@ -73,77 +72,35 @@ def draw_maze(
                 )
 
 
-def start_screen(screen, width, height):
-    # load the image and resize it
-    pacman_image = pygame.image.load("pacman.png").convert_alpha()
-    width_image = width // 10
-    height_image = height // 10
-    pacman_image = pygame.transform.scale(pacman_image, (width_image, height_image))
-
-    font = pygame.font.Font(None, 50)    # Font None = default font
-
-    waiting = True
-    while waiting:
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                return False
-
-            if event.type == pygame.KEYDOWN:     # if the User press any keys
-                if event.key == pygame.K_RETURN:   # and if this key in ENTER
-                    waiting = False                 # stop the presentation frames 
-
-        # Background
-        screen.fill((0, 0, 0))
-
-        # Image Position
-        image_x = (screen.get_width() - pacman_image.get_width()) // 2
-        image_y = height // 8
-
-        screen.blit(pacman_image, (image_x, image_y))    # copy image on surface for later print on screen (.flip) 
-
-        # sentence
-        text = font.render(
-            "press ENTER for start the game",
-            True,       # antialias, softer edges
-            (255, 255, 255)
-        )
-
-        text_x = (screen.get_width() - text.get_width()) // 2
-        text_y = height // 2
-
-        screen.blit(text, (text_x, text_y))    # copy image on surface for later print on screen (.flip)
-
-        pygame.display.flip()
-
-    return True
+def draw_score(screen: pygame.Surface, score: int) -> None:
+    font = pygame.font.Font(None, 36)
+    score_text = font.render(f"Score: {score}", True, (255, 255, 255))
+    screen.blit(score_text, (10, 10))
 
 
 def run_pygame(maze, pacgums: int) -> None:
+    score = 0
+    animation_timer = 0
+    pacman_mouth_open = True
     pygame.init()
-
-    CELL_SIZE = 80       # pixel x cell, we can modify it
-
-    # maze = maze_from_txt_to_array("maze.txt")
+    info = pygame.display.Info()
+    WIDTH = info.current_w
+    HEIGHT = info.current_h
+    CELL_SIZE = 50       # pixel x cell, we can modify it
     rows = len(maze)
     columns = len(maze[0])
-
-    width_window = columns * CELL_SIZE
-    height_window = rows * CELL_SIZE
-
-    screen = pygame.display.set_mode((width_window, height_window))
-    pygame.display.set_caption("Test graphical maze - Pac-Man")     # title of the frames
+    screen = pygame.display.set_mode((WIDTH, HEIGHT), pygame.RESIZABLE)
+    pygame.display.set_caption("Pac-Man")     # title of the frames
 
     # Initial frames
-    if not start_screen(screen, width_window, height_window):
+    if not main_menu(screen):
         pygame.quit()
         return
 
     clock_frames = pygame.time.Clock()        # create clock to control frames x second
     running = True
-
-    pac_gums = generate_pac_gums(maze, pacgums)
-    nmb_superpacgums = len(pac_gums) // 10 # for every 10 pacgums there is one superpacgum
-    super_pac_gums = generate_pac_gums(maze, nmb_superpacgums, excluded_positions=pac_gums,) # generate super pacgum location and avoiding pacgum location already generated
+    super_pac_gums = generate_super_pac_gums(maze) # generate super pacgum location and avoiding pacgum location already generated
+    pac_gums = generate_pac_gums(maze, pacgums, excluded_positions=super_pac_gums)
 
     # Initialize Pacman
     pacman_position = (1, 1)
@@ -153,9 +110,11 @@ def run_pygame(maze, pacgums: int) -> None:
     movement_timer = 0
     movement_delay = 150  # milliseconds between movements
 
-    pacman_image = pygame.image.load("pacman.png").convert_alpha()
+    pacman_open = pygame.image.load("pacman_open.png").convert_alpha()
+    pacman_open = pygame.transform.scale(pacman_open, (CELL_SIZE, CELL_SIZE))
 
-    pacman_image = pygame.transform.scale(pacman_image, (CELL_SIZE, CELL_SIZE))
+    pacman_closed = pygame.image.load("pacman_closed.png").convert_alpha()
+    pacman_closed = pygame.transform.scale(pacman_closed, (CELL_SIZE, CELL_SIZE))
 
     while running:
 
@@ -180,9 +139,14 @@ def run_pygame(maze, pacgums: int) -> None:
                 elif event.key == pygame.K_RIGHT:
                     requested_direction = "right"
 
-        # Automatic Pac-Man movement
-        movement_timer += dt
+        # enables the animation of opening and closing pacman's mouth
+        animation_timer += dt
+        if animation_timer >= 200:
+            animation_timer -= 200
+            pacman_mouth_open = not pacman_mouth_open
 
+        # automatic Pac-Man movement
+        movement_timer += dt
         if movement_timer >= movement_delay:
             movement_timer -= movement_delay
 
@@ -200,13 +164,33 @@ def run_pygame(maze, pacgums: int) -> None:
                     pacman_direction
                 )
 
+                if eat_pac_gum(pacman_position, pac_gums):
+                    score += 10
+
+                elif eat_pac_gum(pacman_position, super_pac_gums):
+                    score += 20
+
         screen.fill((0, 0, 0))                   # background (RGB) color BLACK
         draw_maze(screen, maze, CELL_SIZE)    # prepare the frame
         draw_pac_gums(screen, pac_gums, CELL_SIZE) # Draws pac_gums in maze
         draw_super_pac_gums(screen, super_pac_gums, CELL_SIZE)
 
-        draw_pacman(screen, pacman_position, pacman_image, CELL_SIZE, pacman_direction)
+        if pacman_mouth_open:
+            current_pacman_image = pacman_open
+        else:
+            current_pacman_image = pacman_closed
 
+        draw_pacman(
+            screen,
+            pacman_position,
+            current_pacman_image,
+            CELL_SIZE,
+            pacman_direction
+        )
+
+        draw_pacman(screen, pacman_position,
+                    current_pacman_image, CELL_SIZE, pacman_direction)
+        draw_score(screen, score)
         pygame.display.flip()                    # print the frame to the screen
 
     pygame.quit()
