@@ -1,4 +1,66 @@
-{
-    "Name": "Player1",
-    "Score": 2000
-}
+[
+    {
+        "name": "player1",
+        "score": 95
+    },
+    {
+        "name": "player2",
+        "score": 87
+    },
+    {
+        "name": "player3",
+        "score": 76
+    },
+    {
+        "name": "player4",
+        "score": 92
+    },
+    {
+        "name": "player5",
+        "score": 68
+    },
+    {
+        "name": "player6",
+        "score": 84
+    },
+    {
+        "name": "player7",
+        "score": 73
+    },
+    {
+        "name": "player8",
+        "score": 99
+    },
+    {
+        "name": "player9",
+        "score": 81
+    },
+    {
+        "name": "player10",
+        "score": 65
+    },
+    {
+        "name": "player11",
+        "score": 90
+    },
+    {
+        "name": "player12",
+        "score": 71
+    },
+    {
+        "name": "Manuel",
+        "score": 200
+    },
+    {
+        "name": "john",
+        "score": 200
+    },
+    {
+        "name": "                    ",
+        "score": 200
+    },
+    {
+        "name": "gjhjhgjh",
+        "score": 200
+    }
+]
