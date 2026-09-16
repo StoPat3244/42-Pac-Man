@@ -52,7 +52,6 @@ def load_highscores(filename: str = "data/score.json") -> list[dict]:
     # Return only the 10 highest scores.
     return valid_entries[:MAX_HIGHSCORES_DISPLAYED]
 
-
 def main_menu(screen) -> bool:
     # Load and resize the Pac-Man image used in the menu.
     pacman_image = pygame.image.load("pacman.png").convert_alpha()
@@ -63,13 +62,6 @@ def main_menu(screen) -> bool:
     instruction_font = pygame.font.Font(None, 40)
     highscore_title_font = pygame.font.Font(None, 50)
     highscore_entry_font = pygame.font.Font(None, 32)
-
-    # Define the spacing between the different elements of the menu.
-    gap_after_image = 100
-    gap_after_title = 15
-    gap_after_instruction = 30
-    gap_after_highscore_title = 10
-    gap_between_entries = 3
 
     # Load the saved highscores from the score file.
     highscores = load_highscores()
@@ -84,6 +76,15 @@ def main_menu(screen) -> bool:
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_SPACE:
                     waiting = False
+                elif event.key == pygame.K_RETURN:
+                    # Open the instructions screen. If the player closes the
+                    # window from there, propagate the quit signal upward.
+                    if not instructions_screen(screen):
+                        return False
+                elif event.key == pygame.K_ESCAPE:
+                    # Same exit path used for the window close button (QUIT),
+                    # so the caller only needs to handle one "stop" signal.
+                    return False
 
         # Get the current screen dimensions to center the menu.
         screen_width = screen.get_width()
@@ -92,6 +93,10 @@ def main_menu(screen) -> bool:
         # Render the text elements that will be displayed on the screen.
         title_text = title_font.render("Pac-Man", True, (255, 255, 0))
         instruction_text = instruction_font.render("Push SPACE to play", True, (255, 255, 255))
+        instructions_hint_text = instruction_font.render(
+            "Push ENTER to read the instructions", True, (255, 255, 255)
+        )
+        exit_hint_text = instruction_font.render("Push ESC to exit", True, (255, 255, 255))
         highscore_title_text = highscore_title_font.render(
             "Highscores", True, (255, 255, 0)
         )
@@ -120,21 +125,96 @@ def main_menu(screen) -> bool:
         instruction_rect = instruction_text.get_rect(center=(center_x, 285))
         screen.blit(instruction_text, instruction_rect)
 
-        # Draw the "Highscores" title.
-        highscore_title_rect = highscore_title_text.get_rect(center=(center_x, 335))
+        # Draw the hint for opening the instructions screen.
+        instructions_hint_rect = instructions_hint_text.get_rect(center=(center_x, 320))
+        screen.blit(instructions_hint_text, instructions_hint_rect)
+
+        # Draw the hint for exiting the game.
+        exit_hint_rect = exit_hint_text.get_rect(center=(center_x, 355))
+        screen.blit(exit_hint_text, exit_hint_rect)
+
+        # Draw the "Highscores" title (shifted down to make room for the new hints).
+        highscore_title_rect = highscore_title_text.get_rect(center=(center_x, 405))
         screen.blit(highscore_title_text, highscore_title_rect)
 
         # Draw each highscore entry one below the other.
-        current_y = 365
+        current_y = 435
         for text in highscore_entry_texts:
             entry_rect = text.get_rect(center=(center_x, current_y))
             screen.blit(text, entry_rect)
-            current_y += text.get_height() + gap_between_entries
+            current_y += text.get_height() + 3
 
         # Update the display so all the drawn elements become visible.
         pygame.display.flip()
 
     # Return True when the player presses SPACE and wants to start the game.
+    return True
+
+
+def instructions_screen(screen) -> bool:
+    """
+    Show the controls and a short explanation of how Pac-Man works.
+    Returns True when the player wants to go back to the main menu,
+    and False if the window is closed from here (propagated to main_menu).
+    """
+    title_font = pygame.font.Font(None, 60)
+    text_font = pygame.font.Font(None, 32)
+    back_font = pygame.font.Font(None, 36)
+
+    # Lines describing controls and rules. An empty string adds extra spacing.
+    lines = [
+        "Use the ARROW KEYS to move Pac-Man:",
+        "UP - move up",
+        "DOWN - move down",
+        "LEFT - move left",
+        "RIGHT - move right",
+        "",
+        "Eat all the dots scattered around the maze.",
+        "Avoid the ghosts: if one touches you, you lose a life.",
+        "Eat every dot in the maze to win the level!",
+    ]
+
+    waiting = True
+    while waiting:
+        # Check for keyboard input and window events.
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                return False
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_RETURN:
+                waiting = False
+
+        screen_width = screen.get_width()
+        center_x = screen_width // 2
+
+        # Clear the screen before drawing the instructions again.
+        screen.fill((0, 0, 0))
+
+        # Draw the screen title.
+        title_text = title_font.render("Instructions", True, (255, 255, 0))
+        title_rect = title_text.get_rect(center=(center_x, 90))
+        screen.blit(title_text, title_rect)
+
+        # Draw each line of the instructions, one below the other.
+        current_y = 170
+        for line in lines:
+            if line == "":
+                current_y += 20
+                continue
+            line_text = text_font.render(line, True, (255, 255, 255))
+            line_rect = line_text.get_rect(center=(center_x, current_y))
+            screen.blit(line_text, line_rect)
+            current_y += line_text.get_height() + 8
+
+        # Draw the hint to go back to the main menu.
+        back_text = back_font.render(
+            "Push ENTER to come back to the main menu", True, (255, 255, 0)
+        )
+        back_rect = back_text.get_rect(center=(center_x, current_y + 40))
+        screen.blit(back_text, back_rect)
+
+        # Update the display so all the drawn elements become visible.
+        pygame.display.flip()
+
     return True
 
 
@@ -165,12 +245,8 @@ def save_score(name, score):
         json.dump(scores, file, indent=4, ensure_ascii=False)
 
 
-def game_over(score: int):
-    pygame.init()
-
-    # Set up the game over window.
-    WIDTH, HEIGHT = 600, 400
-    screen = pygame.display.set_mode((WIDTH, HEIGHT))
+def game_over(screen, score) -> None:
+    restart = False
     pygame.display.set_caption("game over")
 
     # Create the fonts used in the screen.
@@ -187,8 +263,8 @@ def game_over(score: int):
     name = ""
 
     # Define the position and size of the name input box.
-    input_rect = pygame.Rect(150, 250, 300, 45)
-    active = True
+                            # (x, y, width, height)
+    #input_rect = pygame.Rect(screen.get_width() // 2, 250, 300, 45)
     clock = pygame.time.Clock()
     running = True
 
@@ -206,10 +282,11 @@ def game_over(score: int):
 
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_RETURN:
+                    restart = True
                     # Save the score only if the player entered a name.
                     if name:
                         save_score(name, score)
-                        running = False
+                    running = False
 
                 elif event.key == pygame.K_BACKSPACE:
                     # Remove the last character from the name.
@@ -232,51 +309,57 @@ def game_over(score: int):
 
         # Display the "GAME OVER" title.
         title_text = title_font.render("GAME OVER", True, WHITE)
-        title_rect = title_text.get_rect(center=(WIDTH // 2, 60))
+        title_rect = title_text.get_rect(center=(screen.get_width()// 2, 60))
         screen.blit(title_text, title_rect)
 
         # Display the player's final score.
         score_text = font.render(f"Score: {score}", True, WHITE)
-        score_rect = score_text.get_rect(center=(WIDTH // 2, 130))
+        score_rect = score_text.get_rect(center=(screen.get_width() // 2, 130))
         screen.blit(score_text, score_rect)
 
         # Display instructions for entering the player's name.
         line1 = font.render("Insert your name", True, WHITE)
         line2 = font.render("(Alphanumeric characters only)", True, WHITE)
-        rect1 = line1.get_rect(center=(WIDTH // 2, 180))
-        rect2 = line2.get_rect(center=(WIDTH // 2, 210))
+        rect1 = line1.get_rect(center=(screen.get_width() // 2, 180))
+        rect2 = line2.get_rect(center=(screen.get_width() // 2, 210))
 
         screen.blit(line1, rect1)
         screen.blit(line2, rect2)
 
+        input_rect = pygame.Rect((screen.get_width() // 2) - 150, 250, 300, 45)
         # Draw the input box around the name field.
         pygame.draw.rect(
-            screen,
-            BLUE if active else GRAY,
-            input_rect,
-            2
+            screen,  # superficie su cui disegnare
+            BLUE,    # colore
+            input_rect,     # posizione del rettangolo
+            2               # spessore della linea
         )
 
         # Display the name currently entered by the player.
         name_text = font.render(name, True, WHITE)
-        name_x = input_rect.x + 10
-        name_y = input_rect.y + 8
-        screen.blit(name_text, (name_x, name_y))
+        name_rect = name_text.get_rect(center=input_rect.center)
 
+        screen.blit(name_text, name_rect)
         # Draw the blinking cursor after the last character.
-        if active and cursor_visible:
-            cursor_x = name_x + name_text.get_width() + 2
-            cursor_y = name_y
-            cursor_height = name_text.get_height()
+        if cursor_visible:
+            cursor_x = name_rect.right + 2
+            cursor_y = name_rect.top
+            cursor_height = name_rect.height
             pygame.draw.rect(
                 screen,
                 WHITE,
                 (cursor_x, cursor_y, 2, cursor_height)
             )
-
+        # return main_menu
+        main_menu_text = font.render("Press ENTER to return to the main menu", True, WHITE)
+        main_menu_rect = main_menu_text.get_rect(center=(screen.get_width() // 2, 500))
+        screen.blit(main_menu_text, main_menu_rect)
         # Update the display and limit the loop to 60 frames per second.
         pygame.display.flip()
         clock.tick(60)
-
+    return
     # Close Pygame when the game over screen is finished.
-    pygame.quit()
+    #pygame.quit()
+    #if restart:
+    #    from main import main
+    #    main()
