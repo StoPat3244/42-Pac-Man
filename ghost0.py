@@ -17,11 +17,15 @@ class Ghost:
         image: pygame.Surface,
         cell_size: int,
         algorithm: str,
+        scatter_targets
     ) -> None:
         self.position = position
         self.image = image
         self.cell_size = cell_size
         self.algorithm = algorithm
+        self.mode = "scatter"
+        self.scatter_targets = scatter_targets
+        self.scatter_target_index = 0
 
     def get_neighbors(
         self,
@@ -212,7 +216,73 @@ class Ghost:
 
         return position
 
+    def distance_to_pacman(self, pacman_position):
+        row, column = self.position
+        pacman_row, pacman_column = pacman_position
+
+        return abs(row - pacman_row) + abs(column - pacman_column)
+
     def move(
+        self,
+        maze: list[list[int]],
+        pacman_position: tuple[int, int],
+        other_ghost_position: tuple[int, int],
+        pacman_direction: str | None = None,
+    ) -> None:
+
+        distance = self.distance_to_pacman(pacman_position)
+
+        if distance <= 7:
+            self.mode = "chase"
+        else:
+            self.mode = "scatter"
+
+        if self.mode == "scatter":
+            self.scatter(maze)
+
+        elif self.mode == "chase":
+            self.chase(
+                maze,
+                pacman_position,
+                other_ghost_position,
+                pacman_direction,
+            )
+
+    def draw(
+        self,
+        screen: pygame.Surface,
+    ) -> None:
+
+        row, column = self.position
+
+        x = column * self.cell_size
+        y = row * self.cell_size
+
+        screen.blit(
+            self.image,
+            (x, y),
+        )
+
+    def scatter(self, maze):
+        target = self.scatter_targets[self.scatter_target_index]
+
+        path = self.a_star(
+            maze,
+            self.position,
+            target,
+        )
+
+        if len(path) < 2:
+            # We reached the current target.
+            self.scatter_target_index = (
+                self.scatter_target_index + 1
+            ) % len(self.scatter_targets)
+
+            return
+
+        self.position = path[1]
+
+    def chase(
         self,
         maze: list[list[int]],
         pacman_position: tuple[int, int],
@@ -263,18 +333,3 @@ class Ghost:
             return
 
         self.position = next_position
-
-    def draw(
-        self,
-        screen: pygame.Surface,
-    ) -> None:
-
-        row, column = self.position
-
-        x = column * self.cell_size
-        y = row * self.cell_size
-
-        screen.blit(
-            self.image,
-            (x, y),
-        )
