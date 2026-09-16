@@ -5,7 +5,7 @@ from pacgums import generate_pac_gums, generate_super_pac_gums
 from movements import Pacman
 from eating import eat_pac_gum, eat_ghost
 from game_menu import main_menu, game_over
-from ghost0 import Ghost
+from ghost import Ghost
 
 # from ghost import draw_ghost
 # from ghost2 import move_ghost_bfs
@@ -15,6 +15,7 @@ NORTH = 1   # bit 0
 EAST = 2    # bit 1
 SOUTH = 4    # bit 2
 WEST = 8  # bit 3
+
 
 def draw_maze(
     screen: pygame.Surface,
@@ -88,9 +89,26 @@ def run_pygame(maze, pacgums: int) -> None:
     info = pygame.display.Info()
     WIDTH = info.current_w
     HEIGHT = info.current_h
-    CELL_SIZE = 50       # pixel x cell, we can modify it
+    CELL_SIZE = 80       # pixel x cell, we can modify it
     screen = pygame.display.set_mode((WIDTH, HEIGHT), pygame.RESIZABLE)
     pygame.display.set_caption("Pac-Man")     # title of the frames
+
+    rows = len(maze)
+    columns = len(maze[0])
+
+    ghost1_scatter_targets = [
+        (0, 0),                  # top-left
+        (rows - 1, columns - 1),        # bottom-right
+        (rows - 1, 0),           # bottom-left
+        (0, columns - 1),  # top_right
+    ]
+
+    ghost2_scatter_targets = [
+        (rows - 1, 0),           # bottom-left
+        (0, 0),                  # top-left
+        (0, columns - 1),  # top_right
+        (rows - 1, columns - 1),        # bottom-right
+        ]
 
     # Initial frames
     if not main_menu(screen):
@@ -105,7 +123,7 @@ def run_pygame(maze, pacgums: int) -> None:
     # Initialize Pacman
 
     movement_timer = 0
-    movement_delay = 150  # milliseconds between movements
+    movement_delay = 200  # milliseconds between movements
 
     pacman_open = pygame.image.load("pacman_open.png").convert_alpha()
     pacman_open = pygame.transform.scale(pacman_open, (CELL_SIZE, CELL_SIZE))
@@ -117,20 +135,20 @@ def run_pygame(maze, pacgums: int) -> None:
 
     # Initialize Ghosts with Algorithm
     ghost_timer = 0
-    ghost_delay = 250
+    ghost_delay = 350
 
     ghost_image = pygame.image.load("ghost.png").convert_alpha()
     ghost_image = pygame.transform.scale(ghost_image, (CELL_SIZE, CELL_SIZE))
 
     ghost2_timer = 0
-    ghost2_delay = 250
+    ghost2_delay = 350
 
     ghost2_image = pygame.image.load("ghost2.png").convert_alpha()
     ghost2_image = pygame.transform.scale(ghost2_image, (CELL_SIZE, CELL_SIZE))
 
-    ghost1 = Ghost(position=(10, 10),image=ghost_image, cell_size=CELL_SIZE, algorithm="a_star")
+    ghost1 = Ghost(position=(10, 10),image=ghost_image, cell_size=CELL_SIZE, algorithm="a_star", scatter_targets=ghost1_scatter_targets)
 
-    ghost2 = Ghost(position=(10, 5), image=ghost2_image, cell_size=CELL_SIZE, algorithm="bfs")
+    ghost2 = Ghost(position=(10, 5), image=ghost2_image, cell_size=CELL_SIZE, algorithm="bfs", scatter_targets=ghost2_scatter_targets)
 
     requested_direction = None
     while running:
