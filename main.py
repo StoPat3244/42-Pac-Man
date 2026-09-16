@@ -1,9 +1,9 @@
 import sys
 import json
-
+import pygame
 from mazegenerator import MazeGenerator
 from start_pygame import run_pygame
-
+from game_menu import main_menu
 # class CustomError(Exception):
 #     pass
 
@@ -45,11 +45,26 @@ def main() -> None:
         with open("config.json") as f:
             text = f.read()
         data = json.loads(remove_comments(text))
-        print(data)
+        #print(data)
         size = (data["width"], data["height"])
         maze_gen = MazeGenerator(size)
         maze = maze_gen.maze
-        run_pygame(maze, data["pacgum"])
+        
+        pygame.init()
+        info = pygame.display.Info()
+        WIDTH = info.current_w
+        HEIGHT = info.current_h
+        screen = pygame.display.set_mode((WIDTH, HEIGHT), pygame.RESIZABLE)
+        pygame.display.set_caption("Pac-Man")
+        running = True
+        while running:
+            if not main_menu(screen):
+                pygame.quit()
+                return
+
+            run_pygame(screen, maze, data["pacgum"])
+        pygame.quit()
+
     except FileNotFoundError:
         print("Unable to locate config.json")
     except Exception as e:
