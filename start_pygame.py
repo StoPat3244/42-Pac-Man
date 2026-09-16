@@ -2,12 +2,13 @@ import pygame
 
 from pacgums import draw_pac_gums, draw_super_pac_gums
 from pacgums import generate_pac_gums, generate_super_pac_gums
-from movements import can_move, move_pacman, draw_pacman, move_ghost
+from movements import Pacman
 from eating import eat_pac_gum, eat_ghost
 from game_menu import main_menu, game_over
+from ghost0 import Ghost
 
-from ghost import draw_ghost
-from ghost2 import move_ghost_bfs
+# from ghost import draw_ghost
+# from ghost2 import move_ghost_bfs
 
 # walls
 NORTH = 1   # bit 0
@@ -83,15 +84,11 @@ def draw_score(screen: pygame.Surface, score: int) -> None:
 
 def run_pygame(maze, pacgums: int) -> None:
     score = 0
-    animation_timer = 0
-    pacman_mouth_open = True
     pygame.init()
     info = pygame.display.Info()
     WIDTH = info.current_w
     HEIGHT = info.current_h
     CELL_SIZE = 50       # pixel x cell, we can modify it
-    rows = len(maze)
-    columns = len(maze[0])
     screen = pygame.display.set_mode((WIDTH, HEIGHT), pygame.RESIZABLE)
     pygame.display.set_caption("Pac-Man")     # title of the frames
 
@@ -106,9 +103,6 @@ def run_pygame(maze, pacgums: int) -> None:
     pac_gums = generate_pac_gums(maze, pacgums, excluded_positions=super_pac_gums)
 
     # Initialize Pacman
-    pacman_position = (1, 1)
-    pacman_direction = "right"
-    requested_direction = None
 
     movement_timer = 0
     movement_delay = 150  # milliseconds between movements
@@ -119,24 +113,26 @@ def run_pygame(maze, pacgums: int) -> None:
     pacman_closed = pygame.image.load("pacman_closed.png").convert_alpha()
     pacman_closed = pygame.transform.scale(pacman_closed, (CELL_SIZE, CELL_SIZE))
 
-    # Initialize Ghost # 1 with A* Algorithm
-    ghost_position = (10, 10)
+    pacman = Pacman(position=(1, 1), open_image=pacman_open, closed_image=pacman_closed, cell_size=CELL_SIZE)
 
+    # Initialize Ghosts with Algorithm
     ghost_timer = 0
-    ghost_delay = 1500
+    ghost_delay = 250
 
     ghost_image = pygame.image.load("ghost.png").convert_alpha()
     ghost_image = pygame.transform.scale(ghost_image, (CELL_SIZE, CELL_SIZE))
 
-    # Initializes Ghost #2 that moves towards pacman future position
-    ghost2_position = (10, 5)
-
     ghost2_timer = 0
-    ghost2_delay = 200
+    ghost2_delay = 250
 
     ghost2_image = pygame.image.load("ghost2.png").convert_alpha()
     ghost2_image = pygame.transform.scale(ghost2_image, (CELL_SIZE, CELL_SIZE))
 
+    ghost1 = Ghost(position=(10, 10),image=ghost_image, cell_size=CELL_SIZE, algorithm="a_star")
+
+    ghost2 = Ghost(position=(10, 5), image=ghost2_image, cell_size=CELL_SIZE, algorithm="bfs")
+
+    requested_direction = None
     while running:
 
         dt = clock_frames.tick(60)  # 60 frames x second (how many times this loop run per second)
@@ -160,92 +156,71 @@ def run_pygame(maze, pacgums: int) -> None:
                 elif event.key == pygame.K_RIGHT:
                     requested_direction = "right"
 
-        # enables the animation of opening and closing pacman's mouth
-        animation_timer += dt
-        if animation_timer >= 250:
-            animation_timer -= 250
-            pacman_mouth_open = not pacman_mouth_open
+        # enables the animation of opening and closing pacman's mouth 
+        pacman.update(dt)
 
         # Ghost Timer and position
-        # ghost_timer += dt
+        ghost_timer += dt
 
-        # if ghost_timer >= ghost_delay:
-        #     ghost_timer -= ghost_delay
+        if ghost_timer >= ghost_delay:
+            ghost_timer -= ghost_delay
 
-        #     ghost_position = move_ghost(
-        #         maze,
-        #         ghost_position,
-        #         pacman_position,
-        #         ghost2_position
-            # )
-            # if ghost_position == pacman_position:
-            #     game_over(score)
-            #     running = False
+            ghost1.move(maze,
+                        pacman.position,
+                        ghost2.position,
+                        pacman.direction
+                        )
+        if ghost1.position == pacman.position:
+            game_over(score)
+            running = False
 
         # Ghost #2 timer and position
 
-        # ghost2_timer += dt
+        ghost2_timer += dt
 
-        # if ghost2_timer >= ghost2_delay:
-        #     ghost2_timer -= ghost2_delay
+        if ghost2_timer >= ghost2_delay:
+            ghost2_timer -= ghost2_delay
 
-        #     ghost2_position = move_ghost_bfs(
-        #         maze,
-        #         ghost2_position,
-        #         pacman_position,
-        #         pacman_direction,
-        #         ghost_position
-        #     )
-            # if ghost2_position == pacman_position:
-            #     game_over(score)
-            #     running = False
+            ghost2.move(
+                maze,
+                pacman.position,
+                ghost1.position,
+                pacman.direction,
+            )
+            if ghost2.position == pacman.position:
+                game_over(score)
+                running = False
 
-        # automatic Pac-Man movement
+        # Automatic Pac-Man movement
         movement_timer += dt
+
         if movement_timer >= movement_delay:
             movement_timer -= movement_delay
 
             # Try to change to the requested direction
             if requested_direction is not None:
-                if can_move(maze, pacman_position, requested_direction):
-                    pacman_direction = requested_direction
+                if pacman.can_move(maze, requested_direction):
+                    pacman.direction = requested_direction
                     requested_direction = None
 
             # Continue moving in the current direction
-            if can_move(maze, pacman_position, pacman_direction):
-                pacman_position = move_pacman(
-                    maze,
-                    pacman_position,
-                    pacman_direction
-                )
+            if pacman.can_move(maze, pacman.direction):
+                pacman.move(maze, pacman.direction)
 
-                if eat_pac_gum(pacman_position, pac_gums):
+                if eat_pac_gum(pacman.position, pac_gums):
                     score += 10
 
-                elif eat_pac_gum(pacman_position, super_pac_gums):
+                elif eat_pac_gum(pacman.position, super_pac_gums):
                     score += 20
-
 
         screen.fill((0, 0, 0))                   # background (RGB) color BLACK
         draw_maze(screen, maze, CELL_SIZE)    # prepare the frame
         draw_pac_gums(screen, pac_gums, CELL_SIZE) # Draws pac_gums in maze
         draw_super_pac_gums(screen, super_pac_gums, CELL_SIZE)
 
-        if pacman_mouth_open:
-            current_pacman_image = pacman_open
-        else:
-            current_pacman_image = pacman_closed
-
-        draw_pacman(
-            screen,
-            pacman_position,
-            current_pacman_image,
-            CELL_SIZE,
-            pacman_direction
-        )
-        # draw_ghost(screen, ghost_position, ghost_image, CELL_SIZE)
-
-        # draw_ghost(screen, ghost2_position, ghost2_image, CELL_SIZE)
+        pacman.draw(screen)
+        ghost1.draw(screen)
+        ghost2.draw(screen)
 
         draw_score(screen, score)
         pygame.display.flip()                    # print the frame to the screen
