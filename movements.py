@@ -1,4 +1,5 @@
 import pygame
+from ghost import a_star
 
 NORTH = 1   # bit 0
 EAST = 2    # bit 1
@@ -85,3 +86,47 @@ def can_move(
 
     return False
 
+
+# def move_ghost(
+#     maze,
+#     ghost_position,
+#     pacman_position,
+#     other_ghost_position
+# ):
+#     path = a_star(
+#         maze,
+#         ghost_position,
+#         pacman_position
+#     )
+
+#     if len(path) < 2:
+#         return ghost_position
+
+#     next_position = path[1]
+
+#     if next_position == other_ghost_position:
+#         return ghost_position
+
+#     return next_position
+
+def move_ghost(
+    maze,
+    ghost_position,
+    pacman_position,
+    other_ghost_position
+):
+    path = a_star(
+        maze,
+        ghost_position,
+        pacman_position
+    )
+
+    if len(path) < 2:
+        return ghost_position
+
+    next_position = path[1]
+
+    if next_position == other_ghost_position:
+        return ghost_position
+
+    return next_position

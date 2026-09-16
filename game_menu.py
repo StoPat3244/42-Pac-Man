@@ -165,7 +165,7 @@ def save_score(name, score):
         json.dump(scores, file, indent=4, ensure_ascii=False)
 
 
-def game_over(score=200):
+def game_over(score: int):
     pygame.init()
 
     # Set up the game over window.

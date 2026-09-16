@@ -2,10 +2,10 @@
 {
     "h_score": "./data/score.json", # this is a comment
     "level": "array_of_multiple_level",
-    "width": 14,
-    "height": 13,
+    "width": 38,
+    "height": 19,
     "lives": 3,
-    "pacgum": 42,
+    "pacgum": 550,
     "points_per_pacgum": 10,
     "points_per_super_pacgum": 50,
     "points_per_ghost": 200,
