@@ -83,15 +83,9 @@ def draw_score(screen: pygame.Surface, score: int) -> None:
     screen.blit(score_text, (10, 10))
 
 
-def run_pygame(maze, pacgums: int) -> None:
+def run_pygame(screen, maze, pacgums: int) -> None:
     score = 0
-    pygame.init()
-    info = pygame.display.Info()
-    WIDTH = info.current_w
-    HEIGHT = info.current_h
     CELL_SIZE = 80       # pixel x cell, we can modify it
-    screen = pygame.display.set_mode((WIDTH, HEIGHT), pygame.RESIZABLE)
-    pygame.display.set_caption("Pac-Man")     # title of the frames
 
     rows = len(maze)
     columns = len(maze[0])
@@ -110,10 +104,6 @@ def run_pygame(maze, pacgums: int) -> None:
         (rows - 1, columns - 1),        # bottom-right
         ]
 
-    # Initial frames
-    if not main_menu(screen):
-        pygame.quit()
-        return
 
     clock_frames = pygame.time.Clock()        # create clock to control frames x second
     running = True
@@ -151,8 +141,8 @@ def run_pygame(maze, pacgums: int) -> None:
     ghost2 = Ghost(position=(10, 5), image=ghost2_image, cell_size=CELL_SIZE, algorithm="bfs", scatter_targets=ghost2_scatter_targets)
 
     requested_direction = None
-    while running:
 
+    while running:
         dt = clock_frames.tick(60)  # 60 frames x second (how many times this loop run per second)
 
         for event in pygame.event.get():
@@ -189,7 +179,6 @@ def run_pygame(maze, pacgums: int) -> None:
                         pacman.direction
                         )
         if ghost1.position == pacman.position:
-            game_over(score)
             running = False
 
         # Ghost #2 timer and position
@@ -206,7 +195,6 @@ def run_pygame(maze, pacgums: int) -> None:
                 pacman.direction,
             )
             if ghost2.position == pacman.position:
-                game_over(score)
                 running = False
 
         # Automatic Pac-Man movement
@@ -243,4 +231,5 @@ def run_pygame(maze, pacgums: int) -> None:
         draw_score(screen, score)
         pygame.display.flip()                    # print the frame to the screen
 
-    pygame.quit()
+    game_over(screen, score)
+    return
