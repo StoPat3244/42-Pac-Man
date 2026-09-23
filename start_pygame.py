@@ -219,7 +219,7 @@ def run_pygame(screen, maze, pacgums: int) -> None:
                 elif event.key == pygame.K_RIGHT:
                     requested_direction = "right"
 
-        # Pac-Man animation
+        # Pacman animation
         pacman.update(dt)
 
         # frigtened timer
@@ -253,7 +253,8 @@ def run_pygame(screen, maze, pacgums: int) -> None:
 
             if ghost1.mode == "frightened":
                 # Ghost gets eaten
-                ghost1.position = (10, 10)
+                ghost1.position = ghost1_start
+                ghost1.set_normal()
 
             else:
                 # Pac-Man gets eaten
@@ -277,14 +278,15 @@ def run_pygame(screen, maze, pacgums: int) -> None:
 
             if ghost2.mode == "frightened":
                 # Ghost gets eaten
-                ghost2.position = (10, 5)
+                ghost2.position = ghost2_start
+                ghost2.set_normal()
 
             else:
                 # Pac-Man gets eaten
                 running = False
 
 
-        # Ghost 3
+        # # Ghost 3
 
         ghost3_timer += dt
 
@@ -302,7 +304,8 @@ def run_pygame(screen, maze, pacgums: int) -> None:
 
             if ghost3.mode == "frightened":
                 # Ghost gets eaten
-                ghost3.position = (10, 10)
+                ghost3.position = ghost3_start
+                ghost3.set_normal()
 
             else:
                 # Pac-Man gets eaten
@@ -327,7 +330,8 @@ def run_pygame(screen, maze, pacgums: int) -> None:
 
             if ghost4.mode == "frightened":
                 # Ghost gets eaten
-                ghost4.position = (10, 5)
+                ghost4.position = ghost4_start
+                ghost4.set_normal()
 
             else:
                 # Pac-Man gets eaten
@@ -378,8 +382,8 @@ def run_pygame(screen, maze, pacgums: int) -> None:
 
                     ghost1.set_frightened()
                     ghost2.set_frightened()
-                    # ghost3.set_frightened()
-                    # ghost4.set_frightened()
+                    ghost3.set_frightened()
+                    ghost4.set_frightened()
 
         screen.fill((0, 0, 0))
 
