@@ -15,12 +15,15 @@ class Ghost:
         self,
         position: tuple[int, int],
         image: pygame.Surface,
+        frightened_image: pygame.Surface,
         cell_size: int,
         algorithm: str,
         scatter_targets
     ) -> None:
         self.position = position
-        self.image = image
+        self.normal_image = image
+        self.frightened_image = frightened_image
+        self.image = self.normal_image
         self.cell_size = cell_size
         self.algorithm = algorithm
         self.mode = "scatter"
@@ -230,6 +233,10 @@ class Ghost:
         pacman_direction: str | None = None,
     ) -> None:
 
+        if self.mode == "frightened":
+            self.frightened(maze, pacman_position)
+            return
+
         distance = self.distance_to_pacman(pacman_position)
 
         if distance <= 7:
@@ -333,3 +340,37 @@ class Ghost:
             return
 
         self.position = next_position
+
+    def frightened(
+        self,
+        maze: list[list[int]],
+        pacman_position: tuple[int, int],
+    ) -> None:
+
+        neighbors = self.get_neighbors(
+            maze,
+            self.position,
+        )
+
+        if not neighbors:
+            return
+
+        # Choose the neighbor that is furthest away
+        # from Pac-Man using Manhattan distance.
+        next_position = max(
+            neighbors,
+            key=lambda position: self.heuristic(
+                position,
+                pacman_position,
+            ),
+        )
+
+        self.position = next_position
+
+    def set_frightened(self) -> None:
+        self.mode = "frightened"
+        self.image = self.frightened_image
+
+    def set_normal(self) -> None:
+        self.mode = "scatter"
+        self.image = self.normal_image
