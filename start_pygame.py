@@ -88,9 +88,6 @@ def run_pygame(screen, maze, pacgums: int) -> None:
     score = 0
     CELL_SIZE = 80       # pixel x cell, we can modify it
 
-    rows = len(maze)
-    columns = len(maze[0])
-
     ghost1_scatter_targets = [
         find_corner_position(maze, "top_left"),
         find_corner_position(maze, "bottom_right"),
@@ -103,6 +100,20 @@ def run_pygame(screen, maze, pacgums: int) -> None:
         find_corner_position(maze, "top_left"),
         find_corner_position(maze, "top_right"),
         find_corner_position(maze, "bottom_right"),
+    ]
+
+    ghost3_scatter_targets = [
+        find_corner_position(maze, "bottom_left"),
+        find_corner_position(maze, "top_left"),
+        find_corner_position(maze, "bottom_right"),
+        find_corner_position(maze, "top_right"),
+    ]
+
+    ghost4_scatter_targets = [
+        find_corner_position(maze, "bottom_right"),
+        find_corner_position(maze, "top_right"),
+        find_corner_position(maze, "top_left"),
+        find_corner_position(maze, "bottom_left"),
     ]
 
     clock_frames = pygame.time.Clock()        # create clock to control frames x second
@@ -137,19 +148,19 @@ def run_pygame(screen, maze, pacgums: int) -> None:
 
     # Initialize Ghosts with Algorithm
     ghost_timer = 0
-    ghost_delay = 350
+    ghost_delay = 500
 
     ghost2_timer = 0
-    ghost2_delay = 350
+    ghost2_delay = 500
 
     ghost3_timer = 0
-    ghost3_delay = 350
+    ghost3_delay = 500
 
     ghost4_timer = 0
-    ghost4_delay = 350
+    ghost4_delay = 500
 
     frightened_timer = 0
-    frightened_duration = 5000
+    frightened_duration = 7000
     frightened_active = False
 
     ghost_image = pygame.image.load("ghost.png").convert_alpha()
@@ -177,16 +188,16 @@ def run_pygame(screen, maze, pacgums: int) -> None:
 
     ghost3 = Ghost(position=ghost3_start, image=ghost3_image,
                    frightened_image=ghost_sick, cell_size=CELL_SIZE,
-                   algorithm="bfs", scatter_targets=ghost2_scatter_targets)
+                   algorithm="bfs", scatter_targets=ghost3_scatter_targets)
 
     ghost4 = Ghost(position=ghost4_start, image=ghost4_image,
                    frightened_image=ghost_sick, cell_size=CELL_SIZE,
-                   algorithm="bfs", scatter_targets=ghost2_scatter_targets)
+                   algorithm="bfs", scatter_targets=ghost4_scatter_targets)
 
     requested_direction = None
 
     while running:
-        
+
         dt = clock_frames.tick(60)
 
         for event in pygame.event.get():
@@ -211,9 +222,7 @@ def run_pygame(screen, maze, pacgums: int) -> None:
         # Pac-Man animation
         pacman.update(dt)
 
-        # --------------------------------------------------
-        # Frightened timer
-        # --------------------------------------------------
+        # frigtened timer
 
         if frightened_active:
             frightened_timer -= dt
@@ -226,9 +235,7 @@ def run_pygame(screen, maze, pacgums: int) -> None:
                 ghost3.set_normal()
                 ghost4.set_normal()
 
-        # --------------------------------------------------
-        # Ghost 1
-        # --------------------------------------------------
+        # ghost1
 
         ghost_timer += dt
 
@@ -252,9 +259,7 @@ def run_pygame(screen, maze, pacgums: int) -> None:
                 # Pac-Man gets eaten
                 running = False
 
-        # --------------------------------------------------
-        # Ghost 2
-        # --------------------------------------------------
+        # Ghost2
 
         ghost2_timer += dt
 
@@ -268,20 +273,18 @@ def run_pygame(screen, maze, pacgums: int) -> None:
                 pacman.direction,
             )
 
-            if ghost2.position == pacman.position:
+        if ghost2.position == pacman.position:
 
-                if ghost2.mode == "frightened":
-                    # Ghost gets eaten
-                    ghost2.position = (10, 5)
+            if ghost2.mode == "frightened":
+                # Ghost gets eaten
+                ghost2.position = (10, 5)
 
-                else:
-                    # Pac-Man gets eaten
-                    running = False
+            else:
+                # Pac-Man gets eaten
+                running = False
 
 
-        # --------------------------------------------------
         # Ghost 3
-        # --------------------------------------------------
 
         ghost3_timer += dt
 
@@ -299,15 +302,14 @@ def run_pygame(screen, maze, pacgums: int) -> None:
 
             if ghost3.mode == "frightened":
                 # Ghost gets eaten
-                ghost1.position = (10, 10)
+                ghost3.position = (10, 10)
 
             else:
                 # Pac-Man gets eaten
                 running = False
 
-        # --------------------------------------------------
+
         # Ghost 4
-        # --------------------------------------------------
 
         ghost4_timer += dt
 
@@ -321,19 +323,18 @@ def run_pygame(screen, maze, pacgums: int) -> None:
                 pacman.direction,
             )
 
-            if ghost4.position == pacman.position:
+        if ghost4.position == pacman.position:
 
-                if ghost4.mode == "frightened":
-                    # Ghost gets eaten
-                    ghost2.position = (10, 5)
+            if ghost4.mode == "frightened":
+                # Ghost gets eaten
+                ghost4.position = (10, 5)
 
-                else:
-                    # Pac-Man gets eaten
-                    running = False
+            else:
+                # Pac-Man gets eaten
+                running = False
 
-        # --------------------------------------------------
-        # Pac-Man movement
-        # --------------------------------------------------
+
+        # pacman movement
 
         movement_timer += dt
 
@@ -377,11 +378,8 @@ def run_pygame(screen, maze, pacgums: int) -> None:
 
                     ghost1.set_frightened()
                     ghost2.set_frightened()
-                    ghost3.set_frightened()
-                    ghost4.set_frightened()
-        # --------------------------------------------------
-        # Drawing
-        # --------------------------------------------------
+                    # ghost3.set_frightened()
+                    # ghost4.set_frightened()
 
         screen.fill((0, 0, 0))
 
