@@ -1,9 +1,10 @@
+import pygame
 import sys
 import json
-import pygame
 from mazegenerator import MazeGenerator
 from start_pygame import run_pygame
 from game_menu import main_menu
+from configuration import Configuration
 # class CustomError(Exception):
 #     pass
 
@@ -46,6 +47,7 @@ def main() -> None:
             text = f.read()
         data = json.loads(remove_comments(text))
         #print(data)
+        config = Configuration.from_dict_to_class(data)
         size = (data["width"], data["height"])
         maze_gen = MazeGenerator(size)
         maze = maze_gen.maze
@@ -61,8 +63,11 @@ def main() -> None:
             if not main_menu(screen):
                 pygame.quit()
                 return
-
-            run_pygame(screen, maze, data["pacgum"])
+            
+            run_pygame(screen, maze, data["pacgum"]) 
+            #if not run_pygame(screen, maze, data["pacgum"]):
+            #    pygame.quit()
+            #    return
         pygame.quit()
 
     except FileNotFoundError:
