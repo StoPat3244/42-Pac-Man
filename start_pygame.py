@@ -429,7 +429,7 @@ def run_game(screen, config: "Configuration") -> int:
             if pause_start is None:
                 pause_start = pygame.time.get_ticks()
             font = pygame.font.Font(None, 60)
-            pause_text = font.render("PAUSE\nPress P to continue", True, (255, 255, 255))
+            pause_text = font.render("PAUSE     Press P to continue", True, (255, 255, 255))
             rect = pause_text.get_rect(center=screen.get_rect().center)
             screen.blit(pause_text, rect)
 # ================================ Level Management ==============================
