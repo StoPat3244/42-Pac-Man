@@ -281,7 +281,9 @@ def game_over(screen, score) -> None:
                 running = False
 
             elif event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_RETURN:
+                if event.key == pygame.K_ESCAPE:
+                    running = False
+                elif event.key == pygame.K_RETURN:
                     restart = True
                     # Save the score only if the player entered a name.
                     if name:
@@ -318,7 +320,7 @@ def game_over(screen, score) -> None:
         screen.blit(score_text, score_rect)
 
         # Display instructions for entering the player's name.
-        line1 = font.render("Insert your name", True, WHITE)
+        line1 = font.render("Insert your name and that press ENTER to save", True, WHITE)
         line2 = font.render("(Alphanumeric characters only)", True, WHITE)
         rect1 = line1.get_rect(center=(screen.get_width() // 2, 180))
         rect2 = line2.get_rect(center=(screen.get_width() // 2, 210))
@@ -351,7 +353,7 @@ def game_over(screen, score) -> None:
                 (cursor_x, cursor_y, 2, cursor_height)
             )
         # return main_menu
-        main_menu_text = font.render("Press ENTER to return to the main menu", True, WHITE)
+        main_menu_text = font.render("or press the ESC key to exit without saving", True, WHITE)
         main_menu_rect = main_menu_text.get_rect(center=(screen.get_width() // 2, 500))
         screen.blit(main_menu_text, main_menu_rect)
         # Update the display and limit the loop to 60 frames per second.
