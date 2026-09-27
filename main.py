@@ -2,8 +2,8 @@ import pygame
 import sys
 import json
 from mazegenerator import MazeGenerator
-from start_pygame import run_pygame
-from game_menu import main_menu
+from start_pygame import run_game
+from game_menu import main_menu, game_over
 from configuration import Configuration
 # class CustomError(Exception):
 #     pass
@@ -42,38 +42,39 @@ def main() -> None:
         print("Please run game as 'python3 pac-man.py config.json'")
         sys.exit(1)
 
-    try:
-        with open("config.json") as f:
-            text = f.read()
-        data = json.loads(remove_comments(text))
-        #print(data)
-        config = Configuration.from_dict_to_class(data)
-        size = (data["width"], data["height"])
-        maze_gen = MazeGenerator(size)
-        maze = maze_gen.maze
+    #try:
+    with open("config.json") as f:
+        text = f.read()
+    data = json.loads(remove_comments(text))
+    #print(data)
+    config = Configuration.from_dict_to_class(data)
+    #size = (data["width"], data["height"])
+    #maze_gen = MazeGenerator(size)
+    #maze = maze_gen.maze
+    pygame.init()
+    info = pygame.display.Info()
+    WIDTH = info.current_w
+    HEIGHT = info.current_h
+    screen = pygame.display.set_mode((WIDTH, HEIGHT), pygame.RESIZABLE)
+    pygame.display.set_caption("Pac-Man")
+    running = True
+    while running:
+        if not main_menu(screen):
+            pygame.quit()
+            return
         
-        pygame.init()
-        info = pygame.display.Info()
-        WIDTH = info.current_w
-        HEIGHT = info.current_h
-        screen = pygame.display.set_mode((WIDTH, HEIGHT), pygame.RESIZABLE)
-        pygame.display.set_caption("Pac-Man")
-        running = True
-        while running:
-            if not main_menu(screen):
-                pygame.quit()
-                return
-            
-            run_pygame(screen, maze, data["pacgum"]) 
-            #if not run_pygame(screen, maze, data["pacgum"]):
-            #    pygame.quit()
-            #    return
-        pygame.quit()
+        #score = run_game(screen, maze, data["pacgum"])
+        score = run_game(screen, config)
+        game_over(screen, score)
+        #if not run_game(screen, maze, data["pacgum"]):
+        #    pygame.quit()
+        #    return
+    pygame.quit()
 
-    except FileNotFoundError:
-        print("Unable to locate config.json")
-    except Exception as e:
-        print(e)
+   # except FileNotFoundError:
+   #     print("Unable to locate config.json")
+   # except Exception as e:
+   #     print(e)
 
 
 if __name__ == "__main__":
