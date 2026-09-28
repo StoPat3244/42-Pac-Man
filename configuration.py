@@ -15,7 +15,6 @@ DEFAULT_HEIGHT = 20
 
 FIXED_CLOSED_CELLS = 18 # 42 logo
 
-
 def _validate(name: str, value: Any, validator: Callable[[Any], Any], default: Any) -> Any:
     try:
         return validator(value)
@@ -97,6 +96,7 @@ class Configuration:
     seed: Union[int, str]
     level_max_time: int
     level: List[Level]
+    cheat_mode = False
 
     def __post_init__(self) -> None:
         self.h_score = _validate("h_score", self.h_score, _check_h_score_path, DEFAULT_H_SCORE)
