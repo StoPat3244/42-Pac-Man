@@ -9,11 +9,13 @@ WEST = 8
 class Pacman:
     def __init__(
         self,
+        start_position: tuple[int, int],
         position: tuple[int, int],
         open_image: pygame.Surface,
         closed_image: pygame.Surface,
         cell_size: int,
     ) -> None:
+        self.start_position = start_position
         self.position = position
         self.open_image = open_image
         self.closed_image = closed_image
