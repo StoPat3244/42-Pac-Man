@@ -344,6 +344,7 @@ class Game:
                             if self.level_index >= len(self.config.level):
                                 # No more levels defined: the player wins the whole game.
                                 self._show_congratulations()
+                                self.running = False
                                 waiting = False
                             else:
                                 (ghost1, ghost1_start), \
