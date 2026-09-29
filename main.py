@@ -67,9 +67,9 @@ def main() -> None:
             #    return
         pygame.quit()
 
-   except FileNotFoundError:
+    except FileNotFoundError:
         print("Unable to locate config.json")
-   except Exception as e:
+    except Exception as e:
         print(e)
 
 
