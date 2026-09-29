@@ -14,6 +14,7 @@ class Ghost:
     def __init__(
         self,
         position: tuple[int, int],
+        start_position: tuple[int, int],
         image: pygame.Surface,
         frightened_image: pygame.Surface,
         cell_size: int,
@@ -21,6 +22,7 @@ class Ghost:
         scatter_targets
     ) -> None:
         self.position = position
+        self.start_position = start_position
         self.normal_image = image
         self.frightened_image = frightened_image
         self.image = self.normal_image
@@ -29,6 +31,7 @@ class Ghost:
         self.mode = "scatter"
         self.scatter_targets = scatter_targets
         self.scatter_target_index = 0
+        self.ghost_timer = 0
 
     def get_neighbors(
         self,
