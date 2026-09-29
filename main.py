@@ -43,39 +43,34 @@ def main() -> None:
         print("Please run game as 'python3 pac-man.py config.json'")
         sys.exit(1)
 
-    #try:
-    with open("config.json") as f:
-        text = f.read()
-    data = json.loads(remove_comments(text))
-    #print(data)
-    config = Configuration.from_dict_to_class(data)
-    #size = (data["width"], data["height"])
-    #maze_gen = MazeGenerator(size)
-    #maze = maze_gen.maze
-    pygame.init()
-    info = pygame.display.Info()
-    WIDTH = info.current_w
-    HEIGHT = info.current_h
-    screen = pygame.display.set_mode((WIDTH, HEIGHT), pygame.RESIZABLE)
-    pygame.display.set_caption("Pac-Man")
-    running = True
-    while running:
-        if not main_menu(screen, config):
-            pygame.quit()
-            return
-        print("CHEAT = ", config.cheat_mode)
-        #score = run_game(screen, maze, data["pacgum"])
-        score = Game(screen, config).run()
-        game_over(screen, score)
-        #if not run_game(screen, maze, data["pacgum"]):
-        #    pygame.quit()
-        #    return
-    pygame.quit()
+    try:
+        with open("config.json") as f:
+            text = f.read()
+        data = json.loads(remove_comments(text))
+        config = Configuration.from_dict_to_class(data)
+        pygame.init()
+        info = pygame.display.Info()
+        WIDTH = info.current_w
+        HEIGHT = info.current_h
+        screen = pygame.display.set_mode((WIDTH, HEIGHT), pygame.RESIZABLE)
+        pygame.display.set_caption("Pac-Man")
+        running = True
+        while running:
+            if not main_menu(screen, config):
+                pygame.quit()
+                return
+            #score = run_game(screen, maze, data["pacgum"])
+            score = Game(screen, config).run()
+            game_over(screen, score)
+            #if not run_game(screen, maze, data["pacgum"]):
+            #    pygame.quit()
+            #    return
+        pygame.quit()
 
-   # except FileNotFoundError:
-   #     print("Unable to locate config.json")
-   # except Exception as e:
-   #     print(e)
+   except FileNotFoundError:
+        print("Unable to locate config.json")
+   except Exception as e:
+        print(e)
 
 
 if __name__ == "__main__":
