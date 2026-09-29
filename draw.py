@@ -9,11 +9,10 @@ EAST = 2
 SOUTH = 4
 WEST = 8
 
-Color = tuple[int, int, int]
-
-BLACK: Color = (0, 0, 0)
-WHITE: Color = (255, 255, 255)
-WALL_BLUE: Color = (33, 79, 222)
+BLACK = (0, 0, 0)
+WHITE = (255, 255, 255)
+YELLOW = (255, 255, 0)
+WALL_BLUE = (33, 79, 222)
 
 # For each wall flag: (start corner, end corner) in unit-cell coordinates.
 _WALLS = (
@@ -33,24 +32,16 @@ _IMAGE_FILES = {
     "ghost_sick": "sick.png",
 }
 
-
-class _HasSize(Protocol):
-    width: int
-    height: int
-
-
 @functools.lru_cache(maxsize=None)
 def _font(size: int) -> pygame.font.Font:
     """Create each font size only once instead of every frame."""
     return pygame.font.Font(None, size)
 
 
-# ------------------------------------------------------------------ sizing
-def define_cell_size(maze_size: _HasSize) -> int:
+def define_cell_size(width: int, height: int) -> int:
     """Largest cell (max 80 px) that fits the maze plus the HUD rows."""
     info = pygame.display.Info()
-    width = maze_size.width
-    height = maze_size.height + 6
+    height += 6 # six cells more for writing the infos (time, score, lives,...)
     return min(80, info.current_w // width, info.current_h // height)
 
 
@@ -65,12 +56,12 @@ def load_images(cell_size: int) -> dict[str, pygame.Surface]:
 
 
 def draw_text(screen: pygame.Surface, text: str, size: int, position: tuple[int, int],
-              color: Color = WHITE) -> None:
+              color: list = WHITE) -> None:
     screen.blit(_font(size).render(text, True, color), position)
 
 
 def draw_centered_text(screen: pygame.Surface, text: str, size: int, dy: int = 0,
-                       color: Color = WHITE) -> None:
+                       color: list = WHITE) -> None:
     surface = _font(size).render(text, True, color)
     center = screen.get_rect().center
     rect = surface.get_rect(center=(center[0], center[1] + dy))
@@ -78,7 +69,7 @@ def draw_centered_text(screen: pygame.Surface, text: str, size: int, dy: int = 0
 
 
 def draw_maze(screen: pygame.Surface, maze: list[list[int]], cell_size: int,
-              offset: tuple[int, int] | None = (0, 0), wall_color: Color = WALL_BLUE,
+              offset: tuple[int, int] | None = (0, 0), wall_color: list = WALL_BLUE,
               wall_thickness: int = 6) -> None:
     rows = len(maze)
     columns = len(maze[0]) if rows else 0
@@ -105,18 +96,23 @@ def draw_maze(screen: pygame.Surface, maze: list[list[int]], cell_size: int,
 
 
 def draw_game_info(screen: pygame.Surface, score: int, lives: int, level: int,
-                   cell_size: int, cheat: bool, remaining_seconds: int, top: int) -> None:
+                   cell_size: int, cheat: bool, invincibility: bool, remaining_seconds: int, top: int) -> None:
     column_width = screen.get_width() // 4
+    draw_text(screen, f"Lives: {lives}", cell_size, (10, top + cell_size))
+    draw_text(screen, f"Time: {remaining_seconds}", cell_size, (10 + column_width, top + cell_size))
+    draw_text(screen, f"Level: {level}", cell_size, (10, top + cell_size * 3))
+    draw_text(screen, f"Score: {score}", cell_size, (10 + column_width, top + cell_size * 3))
+    draw_text(screen, "P = pause", cell_size, (10, top + cell_size * 5))
+    draw_text(screen, "ESC = main menu", cell_size, (10 + column_width, top + cell_size * 5))
     if cheat:
-        draw_text(screen, f"Lives: CHEAT MODE", cell_size, (10, top))
-        draw_text(screen, f"S: skip level", cell_size, (10, top + cell_size))
-    else:
-        draw_text(screen, f"Lives: {lives}", cell_size, (10, top))
-    draw_text(screen, f"Time: {remaining_seconds}", cell_size, (10 + column_width, top))
-    draw_text(screen, f"Level: {level}", cell_size, (10, top + cell_size * 2))
-    draw_text(screen, f"Score: {score}", cell_size, (10 + column_width, top + cell_size * 2))
-    draw_text(screen, "P = pause", cell_size, (10, top + cell_size * 4))
-    draw_text(screen, "ESC = main menu", cell_size, (10 + column_width, top + cell_size * 4))
+        draw_text(screen, "CHEAT MODE ACTIVED", cell_size, (10, top), YELLOW)
+        draw_text(screen, "L : add live", cell_size, (10, top + cell_size * 2), YELLOW)
+        draw_text(screen, "S : skip level", cell_size, (10, top + cell_size * 4), YELLOW)
+        if invincibility:
+            draw_text(screen, "I : invincibility ACTIVATED", cell_size, (10 + column_width, top), YELLOW)
+        else:
+            draw_text(screen, "I: invincibility DEactivated", cell_size, (10 + column_width, top), YELLOW)
+    
 
 def draw_pause(screen: pygame.Surface) -> None:
     draw_centered_text(screen, "PAUSE     Press P to continue", 60)
@@ -130,6 +126,23 @@ def draw_level_won(screen: pygame.Surface) -> None:
     draw_centered_text(screen, "Press SPACE to continue", 40, dy=60)
 
 
-def draw_congratulations(screen: pygame.Surface) -> None:
-    screen.fill(BLACK)
-    draw_centered_text(screen, "CONGRATULATIONS!", 80)
+def draw_life_lost(screen: pygame.Surface) -> None:
+    overlay = pygame.Surface(screen.get_size(), pygame.SRCALPHA)
+    overlay.fill((0, 0, 0, 120))
+    screen.blit(overlay, (0, 0))
+    draw_centered_text(screen, "LIFE LOST", 60)
+
+
+def show_congratulations(screen: pygame.Surface, fps: int) -> None:
+    clock = pygame.time.Clock()
+    end = pygame.time.get_ticks() + 5000
+    # Display the congratulations screen for five seconds
+    while pygame.time.get_ticks() < end:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+        screen.fill(BLACK)
+        draw_centered_text(screen, "YOU DID IT! PAC-MAN MASTER! GAME COMPLETE!", 80)
+        pygame.display.flip()
+        clock.tick(fps)
