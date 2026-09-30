@@ -14,7 +14,7 @@ from positions import find_center_position, find_corner_position
 # Dictionary for each ghost setup: starting corner, algorithm, image, targets corners for scatter mode
 GHOST_SETS = [
     {"corner": "top_left", "algo": "a_star", "image": "ghost1",
-    "target": ["top_left", "bottom_right", "bottom_left", "top_right"]},
+     "target": ["top_left", "bottom_right", "bottom_left", "top_right"]},
     {"corner": "top_right", "algo": "bfs", "image": "ghost2",
     "target": ["bottom_left", "top_left", "top_right", "bottom_right"]},
     {"corner": "bottom_left", "algo": "bfs", "image": "ghost3",
@@ -132,7 +132,7 @@ class Game:
         ghost = self.ghosts[index]
         if ghost.mode == "frightened":
             self.score += self.points_per_ghost
-            ghost.position = ghost.start_position # return the ghost to the start position
+            ghost.position = ghost.start_position  # return the ghost to the start position
             ghost.set_normal()  # ghost return in scatter mode
         else:
             if self.invincibility == False: # check cheat mode
