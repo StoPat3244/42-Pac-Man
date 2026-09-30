@@ -4,6 +4,9 @@ import os
 from pathlib import Path
 from configuration import Configuration
 
+BASE_DIR = Path(__file__).resolve().parent
+ASSETS_DIR = BASE_DIR / "assets"
+
 MAX_NAME_LENGTH = 20
 
 
@@ -11,7 +14,6 @@ def load_highscores(filename: str = "data/score.json") -> list[dict]:
     # Define the maximum number of highscores to display.
     MAX_HIGHSCORES_DISPLAYED = 10
     # Build the path to the score file relative to this Python file.
-    BASE_DIR = Path(__file__).resolve().parent
     filename = BASE_DIR / "data" / "score.json"
     # Check if the score file exists before trying to open it.
     if not os.path.isfile(filename):
@@ -54,7 +56,7 @@ def load_highscores(filename: str = "data/score.json") -> list[dict]:
 
 def main_menu(screen: pygame.Surface, config: Configuration) -> bool:
     # Load and resize the Pac-Man image used in the menu.
-    pacman_image = pygame.image.load("pacman.png").convert_alpha()
+    pacman_image = pygame.image.load(ASSETS_DIR / "pacman.png").convert_alpha()
     pacman_image = pygame.transform.scale(pacman_image, (200, 200))
 
     # Create the fonts used for the different menu elements.
