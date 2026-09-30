@@ -132,6 +132,11 @@ def draw_life_lost(screen: pygame.Surface) -> None:
     screen.blit(overlay, (0, 0))
     draw_centered_text(screen, "LIFE LOST", 60)
 
+def draw_time_finish(screen: pygame.Surface) -> None:
+    overlay = pygame.Surface(screen.get_size(), pygame.SRCALPHA)
+    overlay.fill((0, 0, 0, 120))
+    screen.blit(overlay, (0, 0))
+    draw_centered_text(screen, "OUT OF TIME", 60)
 
 def show_congratulations(screen: pygame.Surface, fps: int) -> None:
     clock = pygame.time.Clock()
