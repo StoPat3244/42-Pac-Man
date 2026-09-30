@@ -1,5 +1,6 @@
 import sys
 import pygame
+import time
 from configuration import Configuration
 import draw
 from eating import eat_pac_gum
@@ -98,7 +99,7 @@ class Game:
         self.requested_direction: str | None = None
         self.paused = False
         self.level_won = False
-        self.start_time = pygame.time.get_ticks() # variable for pause mode
+        self.start_time = time.monotonic() # variable for pause mode
         self.paused_time = 0 # variable for pause mode
         self.pause_start: int | None = None # flag for pause mode
 
@@ -107,7 +108,6 @@ class Game:
         self.level_index += 1
         # If there are no more levels, show the final screen.
         if self.level_index >= len(self.config.level):
-            #self._show_congratulations()
             draw.show_congratulations(self.screen, self.FPS)
             self.running = False
         else: # otherwise, generate the next level
@@ -236,21 +236,19 @@ class Game:
                     ghost.draw(self.screen)
 
                 # ============================ Time Management for pause mode ============================
+                now = time.monotonic()
                 if self.pause_start is not None:
-                    self.paused_time += (
-                        pygame.time.get_ticks() - self.pause_start
-                    )
+                    self.paused_time += now - self.pause_start
                     self.pause_start = None
-                elapsed_time = (pygame.time.get_ticks()
-                                - self.start_time - self.paused_time)
+                elapsed_time = (now - self.start_time - self.paused_time) * 1000
                 if elapsed_time >= self.level_max_time:
                     self.running = False
                     draw.draw_time_finish(self.screen)
                     pygame.display.flip()
-                    end = pygame.time.get_ticks() + 1500
-                    while pygame.time.get_ticks() < end:
+                    end = time.monotonic() + 1.5
+                    while time.monotonic() < end:
                         self.clock.tick(self.FPS)
-                remaining_time = max(0, (self.level_max_time - elapsed_time) // 1000)
+                remaining_time = max(0, int((self.level_max_time - elapsed_time) // 1000))
                 y_top = len(self.maze) * self.cell_size
                 draw.draw_game_info(self.screen, self.score, self.lives,
                               self.level_index + 1, self.cell_size, self.cheat_mode,
@@ -259,7 +257,7 @@ class Game:
         # ===== SECOND BIG PART = PAUSED  object are not more update ============================
             if self.paused:
                 if self.pause_start is None:
-                    self.pause_start = pygame.time.get_ticks()
+                    self.pause_start = time.monotonic()
                 draw.draw_pause(self.screen)
 
             # =============== Lives Lost ==============================
@@ -269,8 +267,8 @@ class Game:
                     ghost.draw(self.screen)
                 draw.draw_life_lost(self.screen)
                 pygame.display.flip()
-                end = pygame.time.get_ticks() + 1500
-                while pygame.time.get_ticks() < end:
+                end = time.monotonic() + 1.5
+                while time.monotonic() < end:
                     self.clock.tick(self.FPS)
                 self.life_lost = False
                 self.pacman.position = self.pacman.start_position
