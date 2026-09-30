@@ -1,7 +1,10 @@
 import functools
 from typing import Protocol
-
+from pathlib import Path
 import pygame
+
+BASE_DIR = Path(__file__).resolve().parent
+ASSETS_DIR = BASE_DIR / "assets"
 
 # Wall bit flags used by the maze generator.
 NORTH = 1
@@ -49,7 +52,7 @@ def load_images(cell_size: int) -> dict[str, pygame.Surface]:
     size = (cell_size, cell_size)
     return {
         name: pygame.transform.scale(
-            pygame.image.load(filename).convert_alpha(), size
+            pygame.image.load(ASSETS_DIR / filename).convert_alpha(), size
         )
         for name, filename in _IMAGE_FILES.items()
     }
