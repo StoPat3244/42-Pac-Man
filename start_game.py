@@ -245,7 +245,11 @@ class Game:
                                 - self.start_time - self.paused_time)
                 if elapsed_time >= self.level_max_time:
                     self.running = False
-
+                    draw.draw_time_finish(self.screen)
+                    pygame.display.flip()
+                    end = pygame.time.get_ticks() + 1500
+                    while pygame.time.get_ticks() < end:
+                        self.clock.tick(self.FPS)
                 remaining_time = max(0, (self.level_max_time - elapsed_time) // 1000)
                 y_top = len(self.maze) * self.cell_size
                 draw.draw_game_info(self.screen, self.score, self.lives,
