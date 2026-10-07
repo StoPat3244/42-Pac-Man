@@ -62,7 +62,7 @@ def generate_super_pac_gums(
         (0, 0),                  # top-left
         (0, columns - 1),        # top-right
         (rows - 1, 0),           # bottom-left
-        (rows - 1, columns - 1), # bottom-right
+        (rows - 1, columns - 1),  # bottom-right
     ]
 
     super_pac_gums = []
