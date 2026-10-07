@@ -3,56 +3,11 @@ import json
 import os
 from pathlib import Path
 from configuration import Configuration
+import time
+MAX_NAME_LENGTH = 10
 
 BASE_DIR = Path(__file__).resolve().parent
 ASSETS_DIR = BASE_DIR / "assets"
-
-MAX_NAME_LENGTH = 20
-
-
-def load_highscores(filename: str = "data/score.json") -> list[dict]:
-    # Define the maximum number of highscores to display.
-    MAX_HIGHSCORES_DISPLAYED = 10
-    # Build the path to the score file relative to this Python file.
-    filename = BASE_DIR / "data" / "score.json"
-    # Check if the score file exists before trying to open it.
-    if not os.path.isfile(filename):
-        print("The path of the 'score file' is incorrect")
-        return []
-    try:
-        # Load the JSON file and convert its contents into Python objects.
-        with open(filename, "r") as f:
-            data = json.load(f)
-    except (json.JSONDecodeError, OSError):
-        # Return an empty list if the file cannot be read or contains invalid JSON.
-        return []
-    # The JSON data must be a list containing the highscore entries.
-    if not isinstance(data, list):
-        return []
-    valid_entries = []
-    # Check each entry and keep only valid players and scores.
-    for entry in data:
-        if not isinstance(entry, dict):
-            continue
-        # Only accept entries with the expected structure.
-        if set(entry.keys()) != {"name", "score"}:
-            continue
-        name = entry["name"]
-        score = entry["score"]
-        # Make sure the name and score have the correct types and values.
-        if not isinstance(name, str):
-            continue
-        if not isinstance(score, int) or isinstance(score, bool) or score < 0:
-            continue
-        # Store the valid entry, limiting the player's name to 10 characters.
-        valid_entries.append({
-            "name": name[:MAX_NAME_LENGTH],
-            "score": score
-        })
-    # Sort all valid scores from highest to lowest.
-    valid_entries.sort(key=lambda entry: entry["score"], reverse=True)
-    # Return only the 10 highest scores.
-    return valid_entries[:MAX_HIGHSCORES_DISPLAYED]
 
 def main_menu(screen: pygame.Surface, config: Configuration) -> bool:
     # Load and resize the Pac-Man image used in the menu.
@@ -66,7 +21,7 @@ def main_menu(screen: pygame.Surface, config: Configuration) -> bool:
     highscore_entry_font = pygame.font.Font(None, 32)
 
     # Load the saved highscores from the score file.
-    highscores = load_highscores()
+    highscores = load_highscores(config.h_score)
 
     # Keep displaying the menu until the player starts the game or quits.
     waiting = True
@@ -90,18 +45,22 @@ def main_menu(screen: pygame.Surface, config: Configuration) -> bool:
 
         # Get the current screen dimensions to center the menu.
         screen_width = screen.get_width()
-        screen_height = screen.get_height()
 
         # Render the text elements that will be displayed on the screen.
-        title_text = title_font.render("Pac-Man", True, (255, 255, 0))
-        instruction_text = instruction_font.render("Press SPACE to play", True, (255, 255, 255))
+        if config.default_version is True:
+            title_text = title_font.render(
+                "Pac-Man [default version]", True, (255, 255, 0))
+        else:
+            title_text = title_font.render(
+                "Pac-Man", True, (255, 255, 0))
+        instruction_text = instruction_font.render(
+            "Press SPACE to play", True, (255, 255, 255))
         instructions_hint_text = instruction_font.render(
-            "Press ENTER to read the instructions", True, (255, 255, 255)
-        )
-        exit_hint_text = instruction_font.render("Press ESC to exit", True, (255, 255, 255))
+            "Press ENTER to read the instructions", True, (255, 255, 255))
+        exit_hint_text = instruction_font.render(
+            "Press ESC to exit", True, (255, 255, 255))
         highscore_title_text = highscore_title_font.render(
-            "Highscores", True, (255, 255, 0)
-        )
+            "Highscores", True, (255, 255, 0))
 
         # Create one text surface for each player in the highscore list.
         highscore_entry_texts = []
@@ -128,15 +87,17 @@ def main_menu(screen: pygame.Surface, config: Configuration) -> bool:
         screen.blit(instruction_text, instruction_rect)
 
         # Draw the hint for opening the instructions screen.
-        instructions_hint_rect = instructions_hint_text.get_rect(center=(center_x, 450))
+        instructions_hint_rect = instructions_hint_text.get_rect(
+            center=(center_x, 450))
         screen.blit(instructions_hint_text, instructions_hint_rect)
 
         # Draw the hint for exiting the game.
         exit_hint_rect = exit_hint_text.get_rect(center=(center_x, 500))
         screen.blit(exit_hint_text, exit_hint_rect)
 
-        # Draw the "Highscores" title (shifted down to make room for the new hints).
-        highscore_title_rect = highscore_title_text.get_rect(center=(center_x, 600))
+        # Draw the "Highscores" title
+        highscore_title_rect = highscore_title_text.get_rect(
+            center=(center_x, 600))
         screen.blit(highscore_title_text, highscore_title_rect)
 
         # Draw each highscore entry one below the other.
@@ -151,6 +112,49 @@ def main_menu(screen: pygame.Surface, config: Configuration) -> bool:
 
     # Return True when the player presses SPACE and wants to start the game.
     return True
+
+
+def load_highscores(filepath: str) -> list[dict]:
+    # Define the maximum number of highscores to display.
+    MAX_HIGHSCORES_DISPLAYED = 10
+    # Build the path to the score file relative to this Python file.
+    BASE_DIR = Path(__file__).resolve().parent
+    filename = BASE_DIR / filepath
+    try:
+        # Load the JSON file and convert its contents into Python objects.
+        with open(filename, "r") as f:
+            data = json.load(f)
+    # FileNotFound e' sottoclasse di OSError
+    except (json.JSONDecodeError, OSError):
+        # Return an empty list if the file contains invalid JSON.
+        return []
+    # The JSON data must be a list containing the highscore entries.
+    if not isinstance(data, list):
+        return []
+    valid_entries = []
+    # Check each entry and keep only valid players and scores.
+    for entry in data:
+        if not isinstance(entry, dict):
+            continue
+        # Only accept entries with the expected structure.
+        if set(entry.keys()) != {"name", "score"}:
+            continue
+        name = entry["name"]
+        score = entry["score"]
+        # Make sure the name and score have the correct types and values.
+        if not isinstance(name, str):
+            continue
+        if not isinstance(score, int) or isinstance(score, bool) or score < 0:
+            continue
+        # Store the valid entry, limiting the player's name to 10 characters.
+        valid_entries.append({
+            "name": name,
+            "score": score
+        })
+    # Sort all valid scores from highest to lowest.
+    valid_entries.sort(key=lambda entry: entry["score"], reverse=True)
+    # Return only the 10 highest scores.
+    return valid_entries[:MAX_HIGHSCORES_DISPLAYED]
 
 
 def instructions_screen(screen: pygame.Surface, config: Configuration) -> bool:
@@ -194,17 +198,18 @@ def instructions_screen(screen: pygame.Surface, config: Configuration) -> bool:
                             cheat_message = "Cheat mode ACTIVATE"
                         else:
                             cheat_message = "Cheat mode DEactivate"
-                        cheat_message_time = pygame.time.get_ticks()
+                        cheat_message_time = time.perf_counter()
+        screen_width = screen.get_width()
+        center_x = screen_width // 2
         if cheat_message:
-            if pygame.time.get_ticks() - cheat_message_time < 2000:
-                cheat_text = text_font.render(cheat_message, True, (255, 255, 0))
+            if time.perf_counter() - cheat_message_time < 2:
+                cheat_text = text_font.render(
+                    cheat_message, True, (255, 255, 0))
                 cheat_rect = cheat_text.get_rect(center=(center_x, 800))
                 screen.blit(cheat_text, cheat_rect)
                 pygame.display.flip()
             else:
                 cheat_message = None
-        screen_width = screen.get_width()
-        center_x = screen_width // 2
 
         # Clear the screen before drawing the instructions again.
         screen.fill((0, 0, 0))
@@ -238,35 +243,36 @@ def instructions_screen(screen: pygame.Surface, config: Configuration) -> bool:
     return True
 
 
-def save_score(name, score):
-    filename = "data/score.json"
-    # Load the existing scores if the file is available.
-    if os.path.exists(filename):
-        try:
+def save_score(filename, name, score):
+    scores = []
+    try:
+        if os.path.exists(filename):
             with open(filename, "r", encoding="utf-8") as file:
-                scores = json.load(file)
-
-            # Make sure the JSON contains a list of scores.
-            if not isinstance(scores, list):
-                scores = []
-        except (json.JSONDecodeError, FileNotFoundError):
-            # Start with an empty list if the file cannot be read correctly.
-            scores = []
-    else:
-        # Create a new empty list if the score file does not exist.
+                loaded = json.load(file)
+            if isinstance(loaded, list):
+                scores = loaded
+    except (json.JSONDecodeError, OSError):
         scores = []
-    # Add the new player's score to the existing scores.
-    scores.append({
-        "name": name,
-        "score": score
-    })
-    # Save all scores back to the JSON file.
-    with open(filename, "w", encoding="utf-8") as file:
-        json.dump(scores, file, indent=4, ensure_ascii=False)
+
+    scores.append({"name": name, "score": score})
+    # Keep only the 10 best scores.
+    scores = [s for s in scores
+              if isinstance(s, dict) and isinstance(s.get("score"), int)]
+    scores.sort(key=lambda s: s["score"], reverse=True)
+    scores = scores[:10]
+
+    try:
+        folder = os.path.dirname(filename)
+        if folder:
+            os.makedirs(folder, exist_ok=True)
+        with open(filename, "w", encoding="utf-8") as file:
+            json.dump(scores, file, indent=4, ensure_ascii=False)
+    except OSError as e:
+        print(f"[ERROR] Cannot save highscore in '{filename}': {e}")
 
 
-def game_over(screen, score) -> None:
-    restart = False
+def game_over(screen: pygame.Surface, path: str,
+              score: int, winner: bool) -> None:
     pygame.display.set_caption("Pac-Man")
 
     # Create the fonts used in the screen.
@@ -276,22 +282,18 @@ def game_over(screen, score) -> None:
     # Define the colors used in the interface.
     WHITE = (255, 255, 255)
     BLACK = (0, 0, 0)
-    GRAY = (180, 180, 180)
     BLUE = (70, 120, 255)
 
     # Store the name entered by the player.
     name = ""
 
-    # Define the position and size of the name input box.
-                            # (x, y, width, height)
-    #input_rect = pygame.Rect(screen.get_width() // 2, 250, 300, 45)
-    clock = pygame.time.Clock()
+    # input_rect = pygame.Rect(screen.get_width() // 2, 250, 300, 45)
     running = True
 
     # Variables used to make the input cursor blink.
     cursor_visible = True
     cursor_timer = 0
-    cursor_blink_time = 500  # milliseconds
+    cursor_blink_time = 0.5  # seconds
 
     # Keep the game over screen open until the player saves the score or quits.
     while running:
@@ -304,10 +306,9 @@ def game_over(screen, score) -> None:
                 if event.key == pygame.K_ESCAPE:
                     running = False
                 elif event.key == pygame.K_RETURN:
-                    restart = True
                     # Save the score only if the player entered a name.
                     if name:
-                        save_score(name, score)
+                        save_score(path, name, score)
                     running = False
 
                 elif event.key == pygame.K_BACKSPACE:
@@ -317,21 +318,25 @@ def game_over(screen, score) -> None:
                 else:
                     # Accept only alphanumeric characters, spaces, and names
                     # up to the maximum allowed length.
-                    if (event.unicode.isalnum() or event.unicode == " ") and len(name) < MAX_NAME_LENGTH:
+                    if ((event.unicode.isalnum() or event.unicode == " ")
+                       and len(name) < MAX_NAME_LENGTH):
                         name += event.unicode
 
-        # Update the cursor timer and toggle its visibility every 500 ms.
-        cursor_timer += clock.get_time()
-        if cursor_timer >= cursor_blink_time:
+        # Update the cursor timer and toggle its visibility every 0.5s.
+        if time.perf_counter() - cursor_timer >= cursor_blink_time:
             cursor_visible = not cursor_visible
-            cursor_timer = 0
+            cursor_timer = time.perf_counter()
 
         # Clear the screen before drawing the new frame.
         screen.fill(BLACK)
 
         # Display the "GAME OVER" title.
-        title_text = title_font.render("GAME OVER", True, WHITE)
-        title_rect = title_text.get_rect(center=(screen.get_width()// 2, 60))
+        if winner is True:
+            title_text = title_font.render(
+                "YOU DID IT! PAC-MAN MASTER! GAME COMPLETE!", True, WHITE)
+        else:
+            title_text = title_font.render("GAME OVER", True, WHITE)
+        title_rect = title_text.get_rect(center=(screen.get_width() // 2, 60))
         screen.blit(title_text, title_rect)
 
         # Display the player's final score.
@@ -340,7 +345,8 @@ def game_over(screen, score) -> None:
         screen.blit(score_text, score_rect)
 
         # Display instructions for entering the player's name.
-        line1 = font.render("Insert your name and that press ENTER to save", True, WHITE)
+        line1 = font.render(
+            "Insert your name and that press ENTER to save", True, WHITE)
         line2 = font.render("(Alphanumeric characters only)", True, WHITE)
         rect1 = line1.get_rect(center=(screen.get_width() // 2, 180))
         rect2 = line2.get_rect(center=(screen.get_width() // 2, 210))
@@ -372,16 +378,11 @@ def game_over(screen, score) -> None:
                 WHITE,
                 (cursor_x, cursor_y, 2, cursor_height)
             )
-        # return main_menu
-        main_menu_text = font.render("or press the ESC key to exit without saving", True, WHITE)
-        main_menu_rect = main_menu_text.get_rect(center=(screen.get_width() // 2, 500))
+        main_menu_text = font.render(
+            "or press the ESC key to exit without saving", True, WHITE)
+        main_menu_rect = main_menu_text.get_rect(
+            center=(screen.get_width() // 2, 500))
         screen.blit(main_menu_text, main_menu_rect)
         # Update the display and limit the loop to 60 frames per second.
         pygame.display.flip()
-        clock.tick(60)
     return
-    # Close Pygame when the game over screen is finished.
-    #pygame.quit()
-    #if restart:
-    #    from main import main
-    #    main()
