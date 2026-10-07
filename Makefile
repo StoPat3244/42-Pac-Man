@@ -13,7 +13,7 @@ lint:
 		mypy . --warn-return-any --warn-unused-ignores --ignore-missing-imports --disallow-untyped-defs	--check-untyped-defs
 
 run:
-	python3 main.py config.json
+	python3 pac-man.py config.json
 
 
 clean:
