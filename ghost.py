@@ -3,7 +3,6 @@ from collections import deque
 
 import pygame
 
-
 NORTH = 1
 EAST = 2
 SOUTH = 4
@@ -14,13 +13,15 @@ class Ghost:
     def __init__(
         self,
         position: tuple[int, int],
-        image: pygame.Surface,
-        frightened_image: pygame.Surface,
+        start_position: tuple[int, int],
+        image: pygame.surface.Surface,
+        frightened_image: pygame.surface.Surface,
         cell_size: int,
         algorithm: str,
         scatter_targets
     ) -> None:
         self.position = position
+        self.start_position = start_position
         self.normal_image = image
         self.frightened_image = frightened_image
         self.image = self.normal_image
@@ -29,6 +30,7 @@ class Ghost:
         self.mode = "scatter"
         self.scatter_targets = scatter_targets
         self.scatter_target_index = 0
+        self.ghost_timer = 0
 
     def get_neighbors(
         self,
@@ -78,12 +80,12 @@ class Ghost:
         if start == target:
             return [start]
 
-        open_set = []
+        open_set: list[tuple[int, tuple[int, int]]] = []
         heapq.heappush(open_set, (0, start))
 
-        came_from = {}
+        came_from: dict[tuple[int, int], tuple[int, int]] = {}
 
-        g_score = {start: 0}
+        g_score: dict[tuple[int, int], int] = {start: 0}
 
         while open_set:
 
@@ -136,35 +138,32 @@ class Ghost:
         start: tuple[int, int],
         target: tuple[int, int],
     ) -> list[tuple[int, int]]:
-
         if start == target:
             return [start]
 
         queue = deque([start])
-
-        came_from = {
+        came_from: dict[tuple[int, int], tuple[int, int] | None] = {
             start: None
         }
-
         while queue:
-
             current = queue.popleft()
 
             if current == target:
-
                 path = [current]
 
-                while came_from[current] is not None:
-                    current = came_from[current]
-                    path.append(current)
+                while True:
+                    parent = came_from[current]
+
+                    if parent is None:
+                        break
+
+                    path.append(parent)
+                    current = parent
 
                 path.reverse()
                 return path
 
-            for neighbor in self.get_neighbors(
-                maze,
-                current,
-            ):
+            for neighbor in self.get_neighbors(maze, current):
                 if neighbor not in came_from:
                     came_from[neighbor] = current
                     queue.append(neighbor)
@@ -257,7 +256,7 @@ class Ghost:
 
     def draw(
         self,
-        screen: pygame.Surface,
+        screen: pygame.surface.Surface,
     ) -> None:
 
         row, column = self.position
