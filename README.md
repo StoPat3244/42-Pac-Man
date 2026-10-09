@@ -1,72 +1,143 @@
-_This project has been created as part of the 42 curriculum by mcarrara, jhenriqu_
+# 42-Pac-Man – Ghosts! More Ghosts!
 
-# 42-Pac-Man - Ghosts! More ghosts!
+## Table of Contents
 
+- [Description](#description)
+- [Instructions](#instructions)
+- [Configuration](#configuration)
+- [High Scores](#high-scores)
+- [Maze Generation](#maze-generation)
+- [Implementation](#implementation)
+- [General Software Architecture](#general-software-architecture)
+  - [Ghost AI](#ghost-ai)
+  - [Maze Generation Details](#maze-generation-details)
+  - [Pac-Man](#pac-man)
+  - [Game Menu](#game-menu)
+- [Project Management](#project-management)
+- [Resources](#resources)
 
+---
 
+## Description
 
-# Description
+This project is an implementation of the classic Pac-Man game, originally released in 1980 and created by Tōru Iwatani. It was developed in Python as part of the 42 curriculum.
 
-This project is an implementation of the classic Pac-Man created in 1980 by Tōru Iwatani. This project has been created in Python as part of the 42 curriculum. As in the original game, the players progress is based on score and by advancing in levels. We also implemented a cheat mode that will allow us to test the game's functionality without the fun part of actually playing the game as intended.
+As in the original game, the player's progress is based on their score and advancement through levels. We also implemented a cheat mode that allows us to test the game's functionality without having to play the game as intended!
 
-# Instructions
+## Instructions
 
-Python3.10 or later is required to run this project.
+Python 3.10 or later is required to run this project.
 
-``make`` will run the instalation for the requiered dependencies and run the program, if the requiered dependencies are already installed, simply run ``python3 main.py config.json`` to start the game.
+Running `make` will install the required dependencies and launch the game. If the dependencies are already installed, you can simply run the following command to start the game:
 
-Once the game has started, you will be greated by the main screen as displayed below:
+```bash
+python3 main.py config.json
+```
 
-![alt text](assets/Screenshot_20261009_133759.png)
+Once the game has started, you will be greeted by the main screen, as shown below:
 
+![Main menu](assets/Screenshot_20261009_133759.png)
 
-Here you can:
+From the main menu, you can:
 
-* Press SPACE to begin the game
+- Press **SPACE** to start the game.
+- Press **ENTER** to view the instructions.
+- View the top 10 highest scores.
 
-* Press ENTER to review instructions
+The game also includes a cheat mode for testing purposes. To enable it, open the Instructions menu and type the word `cheat`. If cheat mode has been activated successfully, a message will appear stating **"Cheat mode ACTIVE"**.
 
-* View top 10 highest scores
+## Configuration
 
-This game also contains a cheat mode use for testing, in order to enable cheat mode go to Instructions and then type in the word "cheat". If cheat mode has been activated succesfully, you will get a message that says "cheat mode ACTIVE"
+The game's configuration settings are defined in the `config.json` file. This file contains the following options:
 
-# Configuration
+- `h_score` – Specifies the path where high-score data is stored. This file is read to display the top 10 scores and updated whenever a new score is saved.
+- `lives` – Specifies the number of lives available per game. The default value is 3.
+- `pacgum` – Sets the number of Pac-Gums placed in the maze.
+- `points_per_pacgum` – Sets the number of points awarded for collecting a regular Pac-Gum.
+- `points_per_super_pacgum` – Sets the number of points awarded for collecting a Super Pac-Gum.
+- `points_per_ghost` – Sets the number of points awarded for eating a ghost.
+- `seed` – Sets the random seed used to generate the maze for level 1. The default seed is 42.
+- `level_max_time` – Sets the time limit for each level.
+- `level` – Defines the width and height of the maze for each level. Ten levels are defined, with decreasing maze sizes as the player progresses.
 
-The game's configurations are found in the ``config.json`` file. This file contains the following configuration details
+## High Scores
 
-* h_score - here the address of where the high score persistent data is saved, this file is read to display the top 10 highest scores and written to store the newest score
+To preserve each player's score after a game ends, the player can enter their name to be saved alongside the score they achieved during that run.
 
-* lives - indicates the amount of lives you have per game, the default value is 3 lives.
+This functionality is handled by the `save_score` function in `game_menu.py`. The scores are stored in `./data/score.json`.
 
-* pacgum - sets the amount of pacgums displayed on the maze.
+When the game starts, the `load_highscores` function reads `score.json`, retrieves the saved scores, and returns the 10 highest scores to be displayed on the screen.
 
-* points_per_pacgum - set the points per pacgum in the maze.
+## Maze Generation
 
-* points_per_super_pacgum - set the points per super pacgum in the maze.
+The maze generator used in this project is provided as an installable package based on the *A-Maze-ing* project developed by other students. We installed the package using `pip` and imported it into our project.
 
-* points_per_ghost - set the points per ghost eaten in the maze.
+The maze generator is used to create the maze for each level. The first level uses a fixed seed of 42, ensuring that the same maze is generated every time. The remaining levels use randomly generated mazes.
 
-* seed - sets the seed for level 1 maze(first maze)
+Each level has a smaller maze than the previous one, increasing the difficulty as the player progresses.
 
-* level_max_time - set the time limit per level.
+## Implementation
 
-* level - sets the witdh and hight for each level's maze, 10 levels are defined with decreasing sizes.
+To recreate Pac-Man, we started by playing the original game to understand its mechanics and determine how best to reproduce the experience.
 
-# Highscore
+Since the maze generator was already provided, we initially focused on generating the maze, placing regular and Super Pac-Gums, and implementing Pac-Man's movement within the maze.
 
+Once maze generation, Pac-Gum placement, and Pac-Man's movement were working correctly, we moved on to implementing the ghost AI and its different movement behaviors.
 
-# Maze Generation
+The ghost AI primarily uses two pathfinding algorithms: **A\*** and **Breadth-First Search (BFS)**. The ghosts use these algorithms to navigate the maze according to their current behavior, such as Chase or Scatter mode.
 
-To generate the maze, we are provided with a mazegenerator packaged based on the A-Maze-ing
+We also created a `Configuration` class to handle parsing the `config.json` file and managing the game's configuration settings.
 
-# Implementation
+## General Software Architecture
 
-# General Software Architecture
+We decided to structure the project by developing the game engine first and then building the user interface around it.
 
-# Project Management
+Our workflow was as follows:
 
-![alt text](assets/image.png)
+![General software architecture](image.png)
 
-# Resources
+### Ghost AI
 
+There are four ghosts in total, and each ghost has three behaviors defined in the `Ghost` class:
 
+- **Frightened** – Activated when Pac-Man eats a Super Pac-Gum. The ghosts attempt to flee from Pac-Man.
+- **Scatter** – The ghosts move between the corners of the maze, exploring their assigned areas.
+- **Chase** – The ghosts pursue Pac-Man when he comes within a distance of seven cells, unless they are in Frightened mode.
+
+In Scatter mode, the ghosts move from one corner of the maze to another. They use the A* algorithm to determine a path between their current position and their target corner.
+
+When Pac-Man eats a Super Pac-Gum, the ghosts enter Frightened mode. They attempt to escape by selecting a cell farther away from Pac-Man and moving towards it.
+
+In Chase mode, the ghosts pursue Pac-Man when he is within seven cells of them. However, Frightened mode takes priority, so the ghosts will continue fleeing while it is active.
+
+### Maze Generation Details
+
+As previously mentioned, the maze generator is provided as an installable package and is responsible for generating the mazes used throughout the game.
+
+Only the first level uses the fixed seed `42`, which ensures that its maze remains the same between runs. The remaining levels use randomly generated mazes.
+
+### Pac-Man
+
+The `Pacman` class is defined in `movements.py`. It handles Pac-Man's movement within the maze, ensuring that he cannot pass through walls and that his movement responds to keyboard input.
+
+### Game Menu
+
+The game's menu system is implemented through several functions in `game_menu.py`. These functions display the main menu, the instructions menu, and the top 10 high scores.
+
+The menu functions also handle user input, allowing players to navigate the menus, start the game, view the high scores, and activate cheat mode from the Instructions menu.
+
+## Project Management
+
+The following image shows the actual time spent developing this project, along with the distribution of tasks.
+
+![Project management and time spent](assets/image.png)
+
+## Resources
+
+- [Python Documentation](https://docs.python.org/3/)
+- [Pygame Documentation](https://www.pygame.org/docs/)
+- The original Pac-Man game, released in 1980 and created by Tōru Iwatani.
+- The *A-Maze-ing* project, on which the provided maze generator package is based.
+- [Diagram Creation](https://app.diagrams.net/ )
+- [Gantt Chart Creation](https://www.onlinegantt.com/#/gantt)
+- Chatgpt used for debugging code, proof reading the readme.

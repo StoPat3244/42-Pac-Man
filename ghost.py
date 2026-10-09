@@ -31,6 +31,23 @@ class Ghost:
         self.scatter_targets = scatter_targets
         self.scatter_target_index = 0
         self.ghost_timer = 0
+        # Ghost respawn state
+        self.is_eaten = False
+        self.respawn_timer = 0
+        self.respawn_delay = 5000
+
+    def update(self, dt: int) -> None:
+        """Update the ghost's respawn countdown."""
+        if not self.is_eaten:
+            return
+
+        self.respawn_timer -= dt
+
+        if self.respawn_timer <= 0:
+            self.position = self.start_position
+            self.set_normal()
+            self.is_eaten = False
+            self.respawn_timer = 0
 
     def get_neighbors(
         self,
@@ -232,6 +249,9 @@ class Ghost:
         pacman_direction: str | None = None,
     ) -> None:
 
+        if self.is_eaten:
+            return
+
         if self.mode == "frightened":
             self.frightened(maze, pacman_position)
             return
@@ -258,6 +278,9 @@ class Ghost:
         self,
         screen: pygame.surface.Surface,
     ) -> None:
+
+        if self.is_eaten:
+            return
 
         row, column = self.position
 

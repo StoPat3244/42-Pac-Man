@@ -122,6 +122,7 @@ class Game:
     def _update_ghosts(self, dt: int) -> None:
         """Update ghost positions and check for collisions with Pac-Man."""
         for i, ghost in enumerate(self.ghosts):  # for each ghost in the list
+            ghost.update(dt)
             ghost.ghost_timer += dt  # increase the timer
             if ghost.ghost_timer >= self.GHOST_DELAY:  # if it is time to move:
                 ghost.ghost_timer -= self.GHOST_DELAY  # update the time
@@ -138,11 +139,18 @@ class Game:
 
     def _collision_ghost_pacman(self, index: int) -> None:
         ghost = self.ghosts[index]
+
+        # Ignore ghosts that have already been eaten
+        if ghost.is_eaten:
+            return
+
         if ghost.mode == "frightened":
             self.score += self.points_per_ghost
+            ghost.is_eaten = True
+            ghost.respawn_timer = ghost.respawn_delay
             # return the ghost to the start position
-            ghost.position = ghost.start_position
-            ghost.set_normal()  # ghost return in scatter mode
+            # ghost.position = ghost.start_position
+            # ghost.set_normal()  # ghost return in scatter mode
         else:
             if self.invincibility is False:  # check cheat mode
                 for ghost in self.ghosts:
