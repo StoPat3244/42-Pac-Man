@@ -3,11 +3,13 @@ _This project has been created as part of the 42 curriculum by mcarrara, jhenriq
 # 42-Pac-Man - Ghosts! More ghosts!
 
 
-**Description**
+
+
+# Description
 
 This project is an implementation of the classic Pac-Man created in 1980 by Tōru Iwatani. This project has been created in Python as part of the 42 curriculum. As in the original game, the players progress is based on score and by advancing in levels. We also implemented a cheat mode that will allow us to test the game's functionality without the fun part of actually playing the game as intended.
 
-**Instructions**
+# Instructions
 
 Python3.10 or later is required to run this project.
 
@@ -28,13 +30,13 @@ Here you can:
 
 This game also contains a cheat mode use for testing, in order to enable cheat mode go to Instructions and then type in the word "cheat". If cheat mode has been activated succesfully, you will get a message that says "cheat mode ACTIVE"
 
-**Configuration**
+# Configuration
 
 The game's configurations are found in the ``config.json`` file. This file contains the following configuration details
 
 * h_score - here the address of where the high score persistent data is saved, this file is read to display the top 10 highest scores and written to store the newest score
 
-* Lives - indicates the amount of lives you have per game, the default value is 3 lives.
+* lives - indicates the amount of lives you have per game, the default value is 3 lives.
 
 * pacgum - sets the amount of pacgums displayed on the maze.
 
@@ -50,21 +52,21 @@ The game's configurations are found in the ``config.json`` file. This file conta
 
 * level - sets the witdh and hight for each level's maze, 10 levels are defined with decreasing sizes.
 
-**Highscore**
+# Highscore
 
 
-**Maze Generation**
+# Maze Generation
 
 To generate the maze, we are provided with a mazegenerator packaged based on the A-Maze-ing
 
-**Implementation**
+# Implementation
 
-**General Software Architecture** 
+# General Software Architecture
 
-**Project Management**
+# Project Management
 
 ![alt text](assets/image.png)
 
-**Resources**
+# Resources
 
 
