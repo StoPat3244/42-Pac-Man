@@ -15,7 +15,7 @@ Python3.10 or later is required to run this project.
 
 Once the game has started, you will be greated by the main screen as displayed below:
 
-![alt text](image.png)
+![alt text](assets/Screenshot_20261009_133759.png)
 
 
 Here you can:
@@ -63,7 +63,7 @@ To generate the maze, we are provided with a mazegenerator packaged based on the
 
 **Project Management**
 
-
+![alt text](assets/image.png)
 
 **Resources**
 
