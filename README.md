@@ -31,7 +31,7 @@ Python 3.10 or later is required to run this project.
 Running `make` will install the required dependencies and launch the game. If the dependencies are already installed, you can simply run the following command to start the game:
 
 ```bash
-python3 main.py config.json
+python3 pac-man.py config.json
 ```
 
 Once the game has started, you will be greeted by the main screen, as shown below:
