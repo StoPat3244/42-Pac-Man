@@ -18,7 +18,7 @@ class Ghost:
         frightened_image: pygame.surface.Surface,
         cell_size: int,
         algorithm: str,
-        scatter_targets
+        scatter_targets: list[tuple[int, int]]
     ) -> None:
         self.position = position
         self.start_position = start_position
@@ -29,14 +29,14 @@ class Ghost:
         self.algorithm = algorithm
         self.mode = "scatter"
         self.scatter_targets = scatter_targets
-        self.scatter_target_index = 0
-        self.ghost_timer = 0
+        self.scatter_target_index: int = 0
+        self.ghost_timer: float = 0
         # Ghost respawn state
         self.is_eaten = False
-        self.respawn_timer = 0
-        self.respawn_delay = 5000
+        self.respawn_timer: float = 0
+        self.respawn_delay: float = 5000
 
-    def update(self, dt: int) -> None:
+    def update(self, dt: float) -> None:
         """Update the ghost's respawn countdown."""
         if not self.is_eaten:
             return
@@ -235,7 +235,7 @@ class Ghost:
 
         return position
 
-    def distance_to_pacman(self, pacman_position):
+    def distance_to_pacman(self, pacman_position: tuple[int, int]) -> int:
         row, column = self.position
         pacman_row, pacman_column = pacman_position
 
@@ -292,9 +292,8 @@ class Ghost:
             (x, y),
         )
 
-    def scatter(self, maze):
+    def scatter(self, maze: list[list[int]]) -> None:
         target = self.scatter_targets[self.scatter_target_index]
-
         path = self.a_star(
             maze,
             self.position,
@@ -322,7 +321,6 @@ class Ghost:
         if self.algorithm == "a_star":
 
             target = pacman_position
-
             path = self.a_star(
                 maze,
                 self.position,
