@@ -15,7 +15,8 @@ def main() -> None:
         sys.exit(1)
 
     try:
-        from mazegenerator import MazeGenerator  # noqa: F401
+        from mazegenerator import MazeGenerator  # noqa: F401 type:
+        # ignore[import-not-found]
         config = Configuration.build_config(sys.argv[1])
         pygame.init()
         info = pygame.display.Info()
