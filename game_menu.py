@@ -245,7 +245,7 @@ def instructions_screen(screen: pygame.surface.Surface,
     return True
 
 
-def save_score(filename, name, score):
+def save_score(filename: str, name: str, score: int) -> None:
     scores = []
     try:
         if os.path.exists(filename):
