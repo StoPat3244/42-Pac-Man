@@ -24,10 +24,10 @@ class Pacman:
 
         # Animation
         self.mouth_open = True
-        self.animation_timer = 0
+        self.animation_timer: float = 0
         self.animation_delay = 250
 
-    def update(self, dt: int) -> None:
+    def update(self, dt: float) -> None:
         """Update Pac-Man's mouth animation."""
         self.animation_timer += dt
 
