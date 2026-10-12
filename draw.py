@@ -21,7 +21,7 @@ _WALLS = (
     (WEST, (0, 0), (0, 1)),
 )
 
-_IMAGE_FILES = {
+_IMAGE_FILES: dict[str, str] = {
     "pacman_open": "pacman_open.png",
     "pacman_closed": "pacman_closed.png",
     "ghost1": "ghost.png",
@@ -36,14 +36,14 @@ ASSETS_DIR = BASE_DIR / "assets"
 
 
 class Clock:
-    def __init__(self):
+    def __init__(self) -> None:
         self.last_time = time.perf_counter()
 
-    def tick(self, fps):
-        current_time = time.perf_counter()
-        dt = current_time - self.last_time
+    def tick(self, fps: int) -> float:
+        current_time: float = time.perf_counter()
+        dt: float = current_time - self.last_time
 
-        delay = max(0, 1 / fps - dt)
+        delay: float = max(0, 1 / fps - dt)
         time.sleep(delay)
 
         current_time = time.perf_counter()
@@ -70,7 +70,7 @@ def load_images(cell_size: int) -> dict[str, pygame.surface.Surface]:
     size = (cell_size, cell_size)
     return {
         name: pygame.transform.scale(
-            pygame.image.load(ASSETS_DIR / filename).convert_alpha(), size
+            pygame.image.load(str(ASSETS_DIR / filename)).convert_alpha(), size
         )
         for name, filename in _IMAGE_FILES.items()
     }
