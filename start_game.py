@@ -80,27 +80,27 @@ class Game:
                              closed_image=self.images["pacman_closed"],
                              cell_size=self.cell_size)
 
-        def _generate_ghosts():
-            ghosts = []
+        def _generate_ghosts() -> list[Ghost]:
+            ghosts: list[Ghost] = []
             for ghost in GHOST_SETS:
                 start_position = find_corner_position(
-                                        self.maze, ghost["corner"])
+                                        self.maze, str(ghost["corner"]))
                 ghosts.append(Ghost(
                     position=start_position,
                     start_position=start_position,
-                    image=self.images[ghost["image"]],
+                    image=self.images[str(ghost["image"])],
                     frightened_image=self.images["ghost_sick"],
                     cell_size=self.cell_size,
-                    algorithm=ghost["algo"],
+                    algorithm=str(ghost["algo"]),
                     scatter_targets=[
-                        find_corner_position(self.maze, corner)
+                        find_corner_position(self.maze, str(corner))
                         for corner in ghost["target"]
                     ],
                 ))
             return ghosts
         self.ghosts = _generate_ghosts()
-        self.movement_timer = 0  # timer for pac_fman movement
-        self.frightened_timer = 0
+        self.movement_timer: float = 0  # timer for pac_fman movement
+        self.frightened_timer: float = 0
         self.frightened_active = False
         self.requested_direction: str | None = None
         self.paused = False
@@ -119,7 +119,7 @@ class Game:
         else:  # otherwise, generate the next level
             self._load_level()  # generate the next without seed
 
-    def _update_ghosts(self, dt: int) -> None:
+    def _update_ghosts(self, dt: float) -> None:
         """Update ghost positions and check for collisions with Pac-Man."""
         for i, ghost in enumerate(self.ghosts):  # for each ghost in the list
             ghost.update(dt)
@@ -190,7 +190,8 @@ class Game:
                     elif event.key == pygame.K_s and self.cheat_mode is True:
                         self.level_won = True  # skip level
                     elif event.key == pygame.K_l and self.cheat_mode is True:
-                        self.lives += 1  # add lives
+                        if self.lives < 100:
+                            self.lives += 1  # add lives
                         if self.paused is True:
                             self._draw_during_pause(remaining_time, y_top)
                     elif event.key == pygame.K_i and self.cheat_mode is True:
@@ -321,7 +322,7 @@ class Game:
 
         return self.score,  self.winner
 
-    def _draw_during_pause(self, time, y_top) -> None:
+    def _draw_during_pause(self, time: int, y_top: int) -> None:
         """Print info update during pause in cheat_mode."""
         pygame.draw.rect(
             self.screen, draw.BLACK,
