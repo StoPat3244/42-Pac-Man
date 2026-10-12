@@ -82,15 +82,17 @@ class Configuration:
 
     def __post_init__(self) -> None:
         self._check_h_score_path(self.h_score)
-        _check_int("lives", self.lives, min_exclusive=0)
+        _check_int("lives", self.lives, min_exclusive=0, max_exclusive=101)
         _check_int("pacgum", self.pacgum, min_exclusive=0)
         _check_int("points_per_pacgum", self.points_per_pacgum,
-                   min_inclusive=0)
+                   min_inclusive=0, max_exclusive=2000)
         _check_int("points_per_super_pacgum", self.points_per_super_pacgum,
-                   min_inclusive=0)
-        _check_int("points_per_ghost", self.points_per_ghost, min_inclusive=0)
+                   min_inclusive=0, max_exclusive=5000)
+        _check_int("points_per_ghost", self.points_per_ghost, min_inclusive=0,
+                   max_exclusive=10000)
         self._check_seed(self.seed)
-        _check_int("level_max_time", self.level_max_time, min_exclusive=0)
+        _check_int("level_max_time", self.level_max_time, min_exclusive=0,
+                   max_exclusive=6000)
         self._check_levels(self.level)
         self._check_pacgum_capacity(self.pacgum, self.level)
 
@@ -154,6 +156,16 @@ class Configuration:
             lines.append(''.join(output))
         return '\n'.join(lines)
 
+    @staticmethod
+    def check_duplicate_keys(pairs: list[tuple[str, Any]]) -> dict[str, Any]:
+        result = {}
+        for key, value in pairs:
+            if key in result:
+                raise ValueError(
+                    f"Duplicate key in the configuration file: '{key}'")
+            result[key] = value
+        return result
+
     @classmethod
     def build_config(cls, filepath: str) -> "Configuration":
         try:
@@ -163,14 +175,11 @@ class Configuration:
                     f"Configuration file must be .json format: {config_path}")
             with open(filepath) as f:
                 text = f.read()
-            data = json.loads(cls._remove_comments(text))
-        # poiche Configuratin e' una @dataclass
-        # posso usare fields(cls) per avere info sui dati di classe
-        # estrae solo i nomi delle variabili di classe. restituendo un set
+            data = json.loads(cls._remove_comments(text),
+                              object_pairs_hook=cls.check_duplicate_keys)
+            # fields(cls) info about keys of the class
             known_keys = {f.name for f in fields(cls)}
-        # qui si crea un nuovo dizionario con solo le chiavi
-        # che la classe conosce (e' case_sensitive)
-            # controllo che ci siano [] oppure {} all inizio del json file
+            # check if [] or {} at the beginning json file
             if isinstance(data, list) and data:
                 data = data[0]
             if not isinstance(data, dict):
