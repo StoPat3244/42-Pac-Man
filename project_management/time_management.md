@@ -30,7 +30,7 @@ The same plan in table form:
 
 We split the project into three phases:
 
-1. **Foundations (together).** Config parsing, maze generation and the basic player/pacgum logic are needed by everything else, so we built them first, as a team.
+1. **Foundations (together).** Config parsing, maze generation and the basic player/pacgum logic are needed by everything else, so we built them first, as a team. We chose not to use any external libraries—other than the MazeGenerator package required by the project’s structure—to keep our program lightweight and easy to install, especially in preparation for its release on Itch.io. In this regard, we did not use Pydantic but instead relied on the data classes already available in Python. In the configuration file, we chose to set limits on various values, with the goal of ensuring the game remains balanced at all times, without extreme values. Lives (min=1, max=100), points per pacgum (min=1, max=2000), points per super pacgum (min=1, max=5000), points per ghost (min=1, max=10000), time (min=1, max=6000), width and height (min=10, max=50).
 2. **Parallel work (two tracks).** Marco worked on the user side of the game (menu, game loop, cheat mode). Joel worked on the ghosts' intelligence (BFS, A*, chase and frightened behaviour). These two parts are mostly independent, so we could work at the same time.
 3. **Integration and finish (together).** Once the game was playable, we built the levels, then spent the last week on error handling, testing and documentation.
 
