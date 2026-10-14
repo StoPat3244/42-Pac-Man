@@ -25,3 +25,5 @@ clean:
 		rm -rf build
 		rm -rf maze.txt
 		rm -rf dist
+		rm -rf __pycache__
+		rm -rf .mypy_cache
