@@ -1,10 +1,6 @@
 import os
 os.environ["PYGAME_HIDE_SUPPORT_PROMPT"] = "1"  # no sms hello from pygame
-import pygame  # noqa: E402
 import sys  # noqa: E402
-from start_game import Game  # noqa: E402
-from game_menu import main_menu, game_over  # noqa: E402
-from configuration import Configuration  # noqa: E402
 
 
 def main() -> None:
@@ -17,8 +13,12 @@ def main() -> None:
     config_path = sys.argv[1] if len(sys.argv) == 2 else "config.json"
 
     try:
+        import pygame
         from mazegenerator import MazeGenerator  # noqa: F401 type:
         # ignore[import-not-found]
+        from start_game import Game  # noqa: E402
+        from game_menu import main_menu, game_over  # noqa: E402
+        from configuration import Configuration  # noqa: E402
         config = Configuration.build_config(config_path)
         pygame.init()
         info = pygame.display.Info()
@@ -36,9 +36,8 @@ def main() -> None:
             score, winner = Game(screen, config).run()
             game_over(screen, config.h_score, score, winner)
     except ModuleNotFoundError:
-        print("[ERROR] The 'mazegenerator' module is not installed.\n"
-              "Install it with: pip install mazegenerator\n"
-              "or copy the 'mazegenerator' folder into the project directory.")
+        print("[ERROR] The necessary modules are not installed.\n"
+              "Install it with: make install \n")
         sys.exit()
     except KeyboardInterrupt:
         print("[INFO] Program terminated by the user.")
@@ -50,4 +49,11 @@ def main() -> None:
 
 
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    except KeyboardInterrupt:
+        print("[INFO] Program terminated by the user.")
+        sys.exit(130)
+    except Exception as e:
+        print(f"[ERROR] {e}")
+        sys.exit(1)
