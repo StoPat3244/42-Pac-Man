@@ -1,6 +1,6 @@
 MAZEGEN = ./assets/mazegenerator-2.1.0-py3-none-any.whl
 
-all: install run
+all: install lint run
 
 install:
 		pip install pygame-ce

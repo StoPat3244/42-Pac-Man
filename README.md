@@ -94,7 +94,7 @@ We decided to structure the project by developing the game engine first and then
 
 Our workflow was as follows:
 
-![General software architecture](image.png)
+![General software architecture](/assets/Pacman-flowchart.png)
 
 ### Ghost AI
 
@@ -128,7 +128,7 @@ The menu functions also handle user input, allowing players to navigate the menu
 
 ## Project Management
 
-The following image shows the actual time spent developing this project, along with the distribution of tasks.
+The following image shows the actual time spent developing this project, along with the distribution of tasks. Additional information can be found [here](/project_management/time_management.md).
 
 ![Project management and time spent](assets/image.png)
 
