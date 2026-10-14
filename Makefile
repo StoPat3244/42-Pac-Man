@@ -15,6 +15,13 @@ lint:
 run:
 	python3 pac-man.py config.json
 
+debug:
+	python3 -m pdb pac-man.py config.json
+
+pkg:
+	python3 -m PyInstaller --clean 42-Pac-Man.spec
 
 clean:
-		rm -rf test.txt
+		rm -rf build
+		rm -rf maze.txt
+		rm -rf dist

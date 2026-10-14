@@ -10,14 +10,16 @@ from configuration import Configuration  # noqa: E402
 def main() -> None:
     """This is the main function"""
 
-    if len(sys.argv) != 2:
+    if len(sys.argv) > 2:
         print("Please run game as 'python3 pac-man.py config.json'")
         sys.exit(1)
+
+    config_path = sys.argv[1] if len(sys.argv) == 2 else "config.json"
 
     try:
         from mazegenerator import MazeGenerator  # noqa: F401 type:
         # ignore[import-not-found]
-        config = Configuration.build_config(sys.argv[1])
+        config = Configuration.build_config(config_path)
         pygame.init()
         info = pygame.display.Info()
         WIDTH = info.current_w
