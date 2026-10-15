@@ -1,7 +1,7 @@
 def find_center_position(
     maze: list[list[int]],
 ) -> tuple[int, int]:
-
+    """Finds the nearest valid cell to the center of the maze."""
     rows = len(maze)
     columns = len(maze[0])
 
@@ -37,7 +37,7 @@ def find_corner_position(
     maze: list[list[int]],
     corner: str,
 ) -> tuple[int, int]:
-
+    """Finds the nearest valid cell to the specified corner of the maze."""
     rows = len(maze)
     columns = len(maze[0])
 
