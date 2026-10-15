@@ -37,9 +37,13 @@ ASSETS_DIR = BASE_DIR / "assets"
 
 class Clock:
     def __init__(self) -> None:
+        """Initializes the clock by recording the current
+        high-resolution time."""
         self.last_time = time.perf_counter()
 
     def tick(self, fps: int) -> float:
+        """Limits the frame rate and returns the elapsed
+        time between frames in seconds."""
         current_time: float = time.perf_counter()
         dt: float = current_time - self.last_time
 
@@ -67,6 +71,7 @@ def define_cell_size(width: int, height: int) -> int:
 
 
 def load_images(cell_size: int) -> dict[str, pygame.surface.Surface]:
+    """Loads and scales all game images to match the specified cell size."""
     size = (cell_size, cell_size)
     return {
         name: pygame.transform.scale(
@@ -79,12 +84,14 @@ def load_images(cell_size: int) -> dict[str, pygame.surface.Surface]:
 def draw_text(screen: pygame.surface.Surface, text: str, size: int,
               position: tuple[int, int],
               color: tuple[int, int, int] = WHITE) -> None:
+    """Renders text on the screen at the specified position."""
     screen.blit(_font(size).render(text, True, color), position)
 
 
 def draw_centered_text(screen: pygame.surface.Surface, text: str, size: int,
                        dy: int = 0,
                        color: tuple[int, int, int] = WHITE) -> None:
+    """Renders text centered on the screen with an optional vertical offset."""
     surface = _font(size).render(text, True, color)
     center = screen.get_rect().center
     rect = surface.get_rect(center=(center[0], center[1] + dy))
@@ -95,6 +102,8 @@ def draw_maze(screen: pygame.surface.Surface, maze: list[list[int]],
               cell_size: int, offset: tuple[int, int] | None = (0, 0),
               wall_color: tuple[int, int, int] = WALL_BLUE,
               wall_thickness: int = 6) -> None:
+    """Draws the maze walls using the cell layout, wall flags,
+    and specified styling."""
     rows = len(maze)
     columns = len(maze[0]) if rows else 0
 
@@ -123,6 +132,8 @@ def draw_game_info(screen: pygame.surface.Surface, score: int, lives: int,
                    level: int, cell_size: int, cheat: bool,
                    invincibility: bool,
                    remaining_seconds: int, top: int) -> None:
+    """Displays the player's score, lives, level, remaining time,
+    and available controls."""
     column_width = screen.get_width() // 4
     draw_text(screen,
               f"Lives: {lives}", cell_size, (10, top + cell_size))
@@ -159,10 +170,13 @@ def draw_game_info(screen: pygame.surface.Surface, score: int, lives: int,
 
 
 def draw_pause(screen: pygame.surface.Surface) -> None:
+    """Displays a pause overlay with instructions to resume the game."""
     draw_centered_text(screen, "PAUSE     Press P to continue", 60)
 
 
 def draw_level_won(screen: pygame.surface.Surface) -> None:
+    """Displays an overlay indicating that the current level
+    has been completed."""
     overlay = pygame.Surface(screen.get_size(), pygame.SRCALPHA)
     overlay.fill((0, 0, 0, 120))
     screen.blit(overlay, (0, 0))
@@ -171,6 +185,7 @@ def draw_level_won(screen: pygame.surface.Surface) -> None:
 
 
 def draw_life_lost(screen: pygame.surface.Surface) -> None:
+    """Displays an overlay indicating that the player has lost a life."""
     overlay = pygame.Surface(screen.get_size(), pygame.SRCALPHA)
     overlay.fill((0, 0, 0, 120))
     screen.blit(overlay, (0, 0))
@@ -178,6 +193,7 @@ def draw_life_lost(screen: pygame.surface.Surface) -> None:
 
 
 def draw_time_finish(screen: pygame.surface.Surface) -> None:
+    """Displays an overlay indicating that the time limit has expired."""
     overlay = pygame.Surface(screen.get_size(), pygame.SRCALPHA)
     overlay.fill((0, 0, 0, 120))
     screen.blit(overlay, (0, 0))
