@@ -20,6 +20,7 @@ class Ghost:
         algorithm: str,
         scatter_targets: list[tuple[int, int]]
     ) -> None:
+        """Initializes the Ghost and sets its initial state."""
         self.position = position
         self.start_position = start_position
         self.normal_image = image
@@ -54,6 +55,8 @@ class Ghost:
         maze: list[list[int]],
         position: tuple[int, int],
     ) -> list[tuple[int, int]]:
+        """Returns all valid neighboring cells connected
+        to the given position."""
         row, column = position
         cell = maze[row][column]
 
@@ -82,6 +85,8 @@ class Ghost:
         position: tuple[int, int],
         target: tuple[int, int],
     ) -> int:
+        """Calculates the Manhattan distance between a position
+        and a target."""
         row, column = position
         target_row, target_column = target
 
@@ -93,6 +98,7 @@ class Ghost:
         start: tuple[int, int],
         target: tuple[int, int],
     ) -> list[tuple[int, int]]:
+        """Finds the shortest path to a target using the A* algorithm."""
 
         if start == target:
             return [start]
@@ -155,6 +161,7 @@ class Ghost:
         start: tuple[int, int],
         target: tuple[int, int],
     ) -> list[tuple[int, int]]:
+        """Finds the shortest path to a target using breadth-first search."""
         if start == target:
             return [start]
 
@@ -194,6 +201,8 @@ class Ghost:
         pacman_direction: str,
         steps: int,
     ) -> tuple[int, int]:
+        """Predicts Pac-Man's future position by simulating movement
+        in the current direction."""
 
         position = pacman_position
 
@@ -236,6 +245,7 @@ class Ghost:
         return position
 
     def distance_to_pacman(self, pacman_position: tuple[int, int]) -> int:
+        """Calculates the Manhattan distance between the ghost and Pac-Man."""
         row, column = self.position
         pacman_row, pacman_column = pacman_position
 
@@ -248,6 +258,8 @@ class Ghost:
         other_ghost_position: tuple[int, int],
         pacman_direction: str | None = None,
     ) -> None:
+        """Updates the ghost's movement and behavior according
+        to distance from Pac-Man."""
 
         if self.is_eaten:
             return
@@ -278,6 +290,7 @@ class Ghost:
         self,
         screen: pygame.surface.Surface,
     ) -> None:
+        """Draws the ghost on the screen unless it has been eaten."""
 
         if self.is_eaten:
             return
@@ -293,6 +306,8 @@ class Ghost:
         )
 
     def scatter(self, maze: list[list[int]]) -> None:
+        """Moves the ghost toward its current scatter target
+        using the A* algorithm."""
         target = self.scatter_targets[self.scatter_target_index]
         path = self.a_star(
             maze,
@@ -317,6 +332,8 @@ class Ghost:
         other_ghost_position: tuple[int, int],
         pacman_direction: str | None = None,
     ) -> None:
+        """Moves the ghost toward Pac-Man or a predicted position using
+        the configured pathfinding algorithm."""
 
         if self.algorithm == "a_star":
 
@@ -366,6 +383,8 @@ class Ghost:
         maze: list[list[int]],
         pacman_position: tuple[int, int],
     ) -> None:
+        """Moves the ghost toward the neighboring cell
+        furthest from Pac-Man."""
 
         neighbors = self.get_neighbors(
             maze,
@@ -388,9 +407,11 @@ class Ghost:
         self.position = next_position
 
     def set_frightened(self) -> None:
+        """Activates frightened mode and changes the ghost's appearance."""
         self.mode = "frightened"
         self.image = self.frightened_image
 
     def set_normal(self) -> None:
+        """Restores the ghost's normal appearance and scatter mode."""
         self.mode = "scatter"
         self.image = self.normal_image
