@@ -3,6 +3,8 @@ def eat_pac_gum(
     pacman_position: tuple[int, int],
     pac_gums: list[tuple[int, int]],
 ) -> bool:
+    """Removes a Pac-Gum at Pac-Man's position and returns whether
+    one was eaten."""
     if pacman_position in pac_gums:
         pac_gums.remove(pacman_position)
         return True
@@ -14,6 +16,8 @@ def eat_ghost(
     pacman_position: tuple[int, int],
     pac_gums: list[tuple[int, int]],
 ) -> bool:
+    """Removes a ghost-related collectible at Pac-Man's position
+    and returns whether one was eaten."""
     if pacman_position in pac_gums:
         pac_gums.remove(pacman_position)
         return True
