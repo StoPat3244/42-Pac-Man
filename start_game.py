@@ -24,6 +24,7 @@ GHOST_SETS = [
 
 
 class Game:
+    """Manages the game state, level initialization, and gameplay elements."""
     FPS = 60    # frame per second
     MOVE_DELAY = 200            # ms between Pac-Man steps
     GHOST_DELAY = 500           # ms between ghost steps
@@ -39,6 +40,7 @@ class Game:
     ghosts: list[Ghost]  # list of 4 Ghost objects
 
     def __init__(self, screen: pygame.surface.Surface, config: Configuration):
+        """Initializes the game and sets its initial state."""
         # Variables that remane for the whole game.
         self.screen = screen  # Pygame scren
         self.config = config  # object Configuration
@@ -59,6 +61,7 @@ class Game:
         self.winner = False
 
     def _load_level(self, seed: int = 0) -> None:
+        """Generates and initializes the current level."""
         # get width and height of the maze
         level = self.config.level[self.level_index]
         # define cell_size
@@ -81,6 +84,7 @@ class Game:
                              cell_size=self.cell_size)
 
         def _generate_ghosts() -> list[Ghost]:
+            """Creates and configures the four ghosts."""
             ghosts: list[Ghost] = []
             for ghost in GHOST_SETS:
                 start_position = find_corner_position(
@@ -138,6 +142,7 @@ class Game:
                     return
 
     def _collision_ghost_pacman(self, index: int) -> None:
+        """Handles collisions between Pac-Man and a ghost."""
         ghost = self.ghosts[index]
 
         # Ignore ghosts that have already been eaten
