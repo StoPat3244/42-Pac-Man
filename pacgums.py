@@ -7,6 +7,7 @@ def generate_pac_gums(
     number_of_gums: int,
     excluded_positions: list[tuple[int, int]] | None = None,
 ) -> list[tuple[int, int]]:
+    """Generates random Pac-Gum positions in valid maze cells."""
     if excluded_positions is None:
         excluded_positions = []
 
@@ -35,6 +36,7 @@ def draw_pac_gums(
     cell_size: int,
     offset: tuple[int, int] = (0, 0),
 ) -> None:
+    """Draws Pac-Gums on the screen at their corresponding maze positions."""
     offset_x, offset_y = offset
 
     for row, column in pac_gums:
@@ -55,6 +57,7 @@ def draw_pac_gums(
 def generate_super_pac_gums(
     maze: list[list[int]],
 ) -> list[tuple[int, int]]:
+    """Generates Super Pac-Gum positions at valid maze corners."""
     rows = len(maze)
     columns = len(maze[0])
 
@@ -80,6 +83,8 @@ def draw_super_pac_gums(
     cell_size: int,
     offset: tuple[int, int] = (0, 0),
 ) -> None:
+    """Draws Super Pac-Gums on the screen at their
+    corresponding maze positions."""
     offset_x, offset_y = offset
 
     for row, column in super_pac_gums:
