@@ -4,7 +4,7 @@ import sys  # noqa: E402
 
 
 def main() -> None:
-    """This is the main function"""
+    """Initialize and run the Pac-Man game."""
 
     if len(sys.argv) > 2:
         print("Please run game as 'python3 pac-man.py config.json'")
