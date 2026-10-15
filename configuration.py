@@ -8,6 +8,8 @@ def _check_int(key: str, value: Any, *,
                min_exclusive: int | None = None,
                min_inclusive: int | None = None,
                max_exclusive: int | None = None) -> None:
+    """Validates that a configuration value is an integer within
+    the specified bounds."""
     if not isinstance(value, int) or isinstance(value, bool):
         raise ValueError(
             f"'{key}' must be an integer, received: {value}")
@@ -28,11 +30,14 @@ class Level():
     height: int
 
     def __post_init__(self) -> None:
+        """Validates the dimensions of a level after initialization."""
         _check_int("width", self.width, min_exclusive=10, max_exclusive=50)
         _check_int("height", self.height, min_exclusive=10, max_exclusive=50)
 
     @classmethod
     def from_dict(cls, data: Dict[str, Any]) -> "Level":
+        """Creates a Level instance from a dictionary containing
+        recognized fields."""
         known_keys = {f.name for f in fields(cls)}
         filtered = {k: v for k, v in data.items() if k in known_keys}
         return cls(**filtered)
@@ -81,6 +86,7 @@ class Configuration:
     default_version = False
 
     def __post_init__(self) -> None:
+        """Validates and initializes the global game configuration."""
         self._check_h_score_path(self.h_score)
         _check_int("lives", self.lives, min_exclusive=0, max_exclusive=101)
         _check_int("pacgum", self.pacgum, min_exclusive=0)
@@ -97,6 +103,8 @@ class Configuration:
         self._check_pacgum_capacity(self.pacgum, self.level)
 
     def _check_levels(self, level: Any) -> None:
+        """Validates the configured levels and converts dictionaries
+        into Level instances."""
         if not isinstance(level, list) or not level:
             raise ValueError("Value for 'level' not valid.")
         else:
@@ -112,6 +120,8 @@ class Configuration:
 
     def _check_pacgum_capacity(self, pacgums: int,
                                level: Level | list["Level"]) -> None:
+        """Checks that the requested number of Pac-Gums fits within every
+        configured maze."""
         levels = level if isinstance(level, list) else [level]
         for current_level in levels:
             if pacgums > (current_level.width * current_level.height - 18):
@@ -120,6 +130,7 @@ class Configuration:
                     "size of the maze.")
 
     def _check_h_score_path(self, path: Any) -> None:
+        """Validates the highscore file path and its file extension."""
         if not isinstance(path, str):
             raise ValueError(
                 f"'h_score' must be a string path, received: {path}")
@@ -134,11 +145,14 @@ class Configuration:
             raise ValueError(f"'h_score' cannot be a directory: {path}")
 
     def _check_seed(self, value: Any) -> None:
+        """Validates that the random seed is an integer."""
         if not isinstance(value, int) or isinstance(value, bool):
             raise ValueError(f"'seed' must be an integer, received: {value}")
 
     @staticmethod
     def _remove_comments(text: str) -> str:
+        """Removes comments from configuration text while preserving
+        comments inside strings."""
         if text == "":
             return "{}"
         lines = []
@@ -158,6 +172,7 @@ class Configuration:
 
     @staticmethod
     def check_duplicate_keys(pairs: list[tuple[str, Any]]) -> dict[str, Any]:
+        """Checks for duplicate keys when parsing JSON configuration data."""
         result = {}
         for key, value in pairs:
             if key in result:
@@ -168,6 +183,8 @@ class Configuration:
 
     @classmethod
     def build_config(cls, filepath: str) -> "Configuration":
+        """Loads and validates a configuration file, falling back to default
+        settings if an error occurs."""
         try:
             config_path = Path(filepath).resolve()
             if config_path.suffix.lower() != ".json":
