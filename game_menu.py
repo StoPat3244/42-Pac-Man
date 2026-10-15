@@ -11,6 +11,8 @@ ASSETS_DIR = BASE_DIR / "assets"
 
 
 def main_menu(screen: pygame.surface.Surface, config: Configuration) -> bool:
+    """Displays the main menu, handles player input,
+    and shows the saved highscores."""
     # Load and resize the Pac-Man image used in the menu.
     pacman_image = pygame.image.load(ASSETS_DIR / "pacman.png").convert_alpha()
     pacman_image = pygame.transform.scale(pacman_image, (200, 200))
@@ -116,6 +118,8 @@ def main_menu(screen: pygame.surface.Surface, config: Configuration) -> bool:
 
 
 def load_highscores(filepath: str) -> list[dict]:
+    """Loads, validates, sorts, and returns the highest
+    scores from a JSON file."""
     # Define the maximum number of highscores to display.
     MAX_HIGHSCORES_DISPLAYED = 10
     # Build the path to the score file relative to this Python file.
@@ -160,11 +164,8 @@ def load_highscores(filepath: str) -> list[dict]:
 
 def instructions_screen(screen: pygame.surface.Surface,
                         config: Configuration) -> bool:
-    """
-    Show the controls and a short explanation of how Pac-Man works.
-    Returns True when the player wants to go back to the main menu,
-    and False if the window is closed from here (propagated to main_menu).
-    """
+    """Displays the game instructions and allows the player
+    to toggle cheat mode."""
     title_font = pygame.font.Font(None, 60)
     text_font = pygame.font.Font(None, 32)
     back_font = pygame.font.Font(None, 36)
@@ -246,6 +247,8 @@ def instructions_screen(screen: pygame.surface.Surface,
 
 
 def save_score(filename: str, name: str, score: int) -> None:
+    """Saves a player's score to a JSON file, keeping only the
+    ten highest scores."""
     scores = []
     try:
         if os.path.exists(filename):
@@ -275,6 +278,8 @@ def save_score(filename: str, name: str, score: int) -> None:
 
 def game_over(screen: pygame.surface.Surface, path: str,
               score: int, winner: bool) -> None:
+    """Displays the game-over or victory screen and allows
+    the player to save their score."""
     pygame.display.set_caption("Pac-Man")
 
     # Create the fonts used in the screen.
