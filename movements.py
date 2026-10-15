@@ -14,6 +14,7 @@ class Pacman:
         closed_image: pygame.surface.Surface,
         cell_size: int,
     ) -> None:
+        """Initializes the Pacman and sets its initial state."""
         self.start_position = start_position
         self.position = position
         self.open_image = open_image
@@ -40,6 +41,7 @@ class Pacman:
         maze: list[list[int]],
         direction: str,
     ) -> bool:
+        """Checks whether Pac-Man can move in the specified direction."""
         row, column = self.position
         cell = maze[row][column]
 
@@ -62,6 +64,7 @@ class Pacman:
         maze: list[list[int]],
         direction: str,
     ) -> None:
+        """Moves Pac-Man in the specified direction if the path is clear."""
         if not self.can_move(maze, direction):
             return
 
@@ -80,6 +83,7 @@ class Pacman:
         self.direction = direction
 
     def draw(self, screen: pygame.surface.Surface) -> None:
+        """Draws Pac-Man on the screen with the appropriate animation."""
         row, column = self.position
 
         x = column * self.cell_size
